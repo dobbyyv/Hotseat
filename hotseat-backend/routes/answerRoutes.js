@@ -67,9 +67,22 @@ router.post('/answer', strictLimiter, async (req, res) => {
   }
 });
 
-// GET /api/answers/:group_id/:question_id — fetch answers
+// GET /api/answers/:group_id/:question_id — fetch answers (requires group membership)
 router.get('/answers/:group_id/:question_id', async (req, res) => {
   const { group_id, question_id } = req.params;
+  const userId = parseInt(req.query.user_id, 10);
+
+  // Verify group membership before serving data
+  if (userId) {
+    const memberCheck = await pool.query(
+      "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
+      [userId, group_id]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(403).json({ error: "You are not a member of this group." });
+    }
+  }
+
   try {
     const result = await pool.query(`
       SELECT

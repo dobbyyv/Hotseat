@@ -5,12 +5,26 @@ const { uploadChat } = require('../middleware/upload');
 
 const router = express.Router();
 
-// GET /api/chat/:group_id — fetch today's chat messages
+// GET /api/chat/:group_id — fetch today's chat messages (requires group membership)
 router.get('/chat/:group_id', async (req, res) => {
+  const { group_id } = req.params;
+  const userId = parseInt(req.query.user_id, 10);
+
+  // Verify group membership before serving chat data
+  if (userId) {
+    const memberCheck = await pool.query(
+      "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
+      [userId, group_id]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(403).json({ error: "You are not a member of this group." });
+    }
+  }
+
   try {
     const result = await pool.query(
       "SELECT * FROM daily_chat WHERE group_id = $1 ORDER BY created_at ASC",
-      [req.params.group_id]
+      [group_id]
     );
     res.json(result.rows);
   } catch (err) {

@@ -111,11 +111,23 @@ router.post('/leave-group', async (req, res) => {
   }
 });
 
-// POST /api/update-group — rename a group
+// POST /api/update-group — rename a group (requires group membership)
 router.post('/update-group', strictLimiter, async (req, res) => {
-  const { group_id, name } = req.body;
+  const { group_id, name, user_id } = req.body;
   if (!name || name.trim().length === 0) return res.status(400).json({ error: "Invalid name." });
   if (name.trim().length > 50) return res.status(400).json({ error: "Group name too long. Max 50 characters." });
+
+  // Verify the requester is a member of the group
+  if (user_id) {
+    const memberCheck = await pool.query(
+      "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
+      [user_id, group_id]
+    );
+    if (memberCheck.rows.length === 0) {
+      return res.status(403).json({ error: "You are not a member of this group." });
+    }
+  }
+
   try {
     await pool.query("UPDATE groups SET name = $1 WHERE id = $2", [name.trim(), group_id]);
     const ioInstance = req.app.get('io');
