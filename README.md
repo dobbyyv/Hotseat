@@ -7,6 +7,10 @@
 
 A real-time daily question platform for friend groups. One question drops every day at 9:00 AM CET. Everyone submits their answer privately. Once you've answered, the results unlock and you can see what your friends said — alongside a live group chat, GIF search, and push notifications.
 
+Hotseat started as a simple, zero-stress app built just for me and my friends to use daily. But as I kept working on it, it turned into an accidental playground for learning full-stack engineering. 
+
+Instead of treating it like a static homework assignment, I started "min-maxing" it, diving down rabbit holes to figure out how real-time WebSockets actually behave under the hood, how to structure clean Express routing, and how to patch backend gaps, just to see how a robust system should be built. It wasn't about enterprise compliance; it was about the satisfaction of taking a scrappy project and making it clean, fast, and genuinely well-engineered.
+
 **Live Demo:** [hotseat.site](https://hotseat.site)
 
 ## Architecture Overview
