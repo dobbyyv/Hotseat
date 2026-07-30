@@ -20,7 +20,8 @@ const REACTIONS = [
   { emoji: '💜', label: 'heart' },
 ]
 
-function VoteBreakdown({ answers, groupMembers, serverUrl, revealed }) {
+// ── VoteBreakdown · module-scoped to prevent re-creation on parent re-render ──
+const VoteBreakdown = ({ answers, groupMembers, serverUrl, revealed }) => {
   const total = answers.length
   const ranked = useMemo(() => {
     const map = {}
@@ -94,7 +95,8 @@ function VoteBreakdown({ answers, groupMembers, serverUrl, revealed }) {
   )
 }
 
-function AnswerCard({ ans, index, isMe, revealed, serverUrl }) {
+// ── AnswerCard · module-scoped ──
+const AnswerCard = ({ ans, index, isMe, revealed, serverUrl }) => {
   return (
     <motion.div initial={{ opacity: 0, x: -14 }} animate={revealed ? { opacity: 1, x: 0 } : {}} transition={{ delay: index * 0.1 }}
       className={`bg-zinc-800/60 backdrop-blur-xl border rounded-2xl p-4 flex gap-3 ${isMe ? 'border-white/20' : 'border-white/8'}`}>
@@ -109,7 +111,8 @@ function AnswerCard({ ans, index, isMe, revealed, serverUrl }) {
   )
 }
 
-function ChatBubble({ msg, isMe, serverUrl }) {
+// ── ChatBubble · module-scoped ──
+const ChatBubble = ({ msg, isMe, serverUrl }) => {
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95, y: 10 }}
