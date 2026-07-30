@@ -29,7 +29,7 @@
   }
 }
 
-//Custom scrollbar 
+
 ::-webkit-scrollbar {
   width: 5px;
 }
@@ -74,11 +74,22 @@ button:focus-visible {
   100% { background-position: -200% 0; }
 }
 
-/* ───── Invisible scrollbar — keeps the aesthetic clean ───── */
-.no-scrollbar {
-  scrollbar-width: none;
+/* ───── Custom dark-mode chat scrollbar ───── */
+.chat-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
 }
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
+.chat-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.chat-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+}
+.chat-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.22);
 }
 

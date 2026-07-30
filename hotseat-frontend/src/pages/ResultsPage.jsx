@@ -284,10 +284,10 @@ export default function ResultsPage() {
         </motion.div>
       </motion.div>
 
-      {/* Live Chat — strict flex-1 min-h-0 so it takes ALL remaining space
-          without ever pushing beyond the viewport. Internal messages scroll
-          invisibly via scrollbar-width: none + webkit-scrollbar display:none. */}
-      <div className="flex-1 min-h-0 flex flex-col bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-5 md:p-6">
+      {/* Live Chat — strict flex-1 min-h-0 overflow-hidden so it NEVER
+          pushes beyond the viewport, even with 100+ messages.
+          Custom dark scrollbar via .chat-scrollbar utility class. */}
+      <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-5 md:p-6">
         <div className="flex items-center gap-3 mb-3 flex-shrink-0">
           <div className="h-px flex-1 bg-white/10" />
           <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">{text.liveChat ?? 'Live Chat'}</span>
@@ -295,7 +295,7 @@ export default function ResultsPage() {
         </div>
         <div
           ref={chatScrollRef}
-          className="flex-1 min-h-0 overflow-y-auto space-y-3 mb-3 no-scrollbar"
+          className="flex-1 min-h-0 overflow-y-auto space-y-3 mb-3 chat-scrollbar"
         >
           {messages.length === 0 && (
             <div className="flex items-center justify-center h-full min-h-[120px]">
