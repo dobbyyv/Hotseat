@@ -245,9 +245,9 @@ export default function ResultsPage() {
   )
 
   return (
-    <div className="w-full max-w-4xl mx-auto space-y-6 pb-24 min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="flex justify-between items-center pt-8">
+    <div className="w-full max-w-4xl mx-auto h-full flex flex-col">
+      {/* Header — fixed top, flex-shrink-0 */}
+      <div className="flex justify-between items-center pt-4 pb-2 flex-shrink-0">
         <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Results</p>
         <div className="flex items-center gap-2">
           <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/10">{group?.name}</span>
@@ -255,132 +255,140 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* PILLAR 3: Vote Breakdown Bento Card with breathing border */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden group"
+      {/* Scrollable middle section — flex-1 + min-h-0 for proper overflow */}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pb-3"
+        style={{ scrollbarWidth: 'none' }}
       >
-        {/* Ambient animated border sweep on hover */}
-        <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'shimmer 3s ease-in-out infinite' }} />
-        <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <p className="text-xl md:text-2xl font-semibold tracking-tight text-zinc-100 mb-6 leading-snug">
-          {question[`text_${lang}`] ?? question.text}
-        </p>
-        <button onClick={() => setAnswersCollapsed(c => !c)} className="w-full flex items-center justify-between py-2 text-zinc-500 hover:text-zinc-300 transition-colors mb-2">
-          <span className="text-white text-[11px] font-bold uppercase tracking-widest">{isVoteQuestion ? 'Vote Breakdown' : 'Answers'}</span>
-          <div className="flex items-center gap-2">
-            {!isFetchingAnswers && (groupAnswers?.length > 0) && <span className="bg-white/10 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/10">{groupAnswers.length}</span>}
-            {answersCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-          </div>
-        </button>
-        <motion.div animate={{ height: answersCollapsed ? 0 : 'auto' }} transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ overflow: 'hidden' }}>
-          <div className="pt-2">
-            {isFetchingAnswers ? <div className="flex justify-center py-8"><Loader2 size={22} className="text-zinc-400 animate-spin" /></div>
-            : !groupAnswers || groupAnswers.length === 0 ? <p className="text-zinc-600 text-sm text-center py-8">No answers yet — be the first!</p>
-            : isVoteQuestion ? <VoteBreakdown answers={groupAnswers} groupMembers={group?.members} serverUrl={SERVER_URL} revealed={revealed} />
-            : <div className="space-y-3">{groupAnswers.map((ans, i) => <AnswerCard key={ans.user_id} ans={ans} index={i} isMe={ans.user_id === user.id} revealed={revealed} serverUrl={SERVER_URL} />)}</div>}
-          </div>
-        </motion.div>
-      </motion.div>
-
-      {/* Live Chat Glass Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.05 }}
-        className="bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 min-h-[350px] flex flex-col justify-between"
-      >
-        <div className="flex items-center gap-3 mb-4">
-          <div className="h-px flex-1 bg-white/10" />
-          <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">{text.liveChat ?? 'Live Chat'}</span>
-          <div className="h-px flex-1 bg-white/10" />
-        </div>
-        <div ref={chatScrollRef} className="flex-1 min-h-[200px] overflow-y-auto overscroll-contain space-y-3 mb-4">
-          {messages.length === 0 && (
-            <div className="flex items-center justify-center h-full">
-              {/* PILLAR 3: Terminal pill with radar ping */}
-              <span className="font-mono text-xs text-zinc-500 bg-zinc-950/50 border border-white/5 px-4 py-2 rounded-full mx-auto animate-pulse relative">
-                <span className="absolute inset-0 rounded-full bg-white/5 animate-ping" />
-                <span className="relative">No messages yet. Start the chaos ↓</span>
-              </span>
+        {/* PILLAR 3: Vote Breakdown Bento Card with breathing border */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25 }}
+          className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden group"
+        >
+          {/* Ambient animated border sweep on hover */}
+          <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'shimmer 3s ease-in-out infinite' }} />
+          <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <p className="text-xl md:text-2xl font-semibold tracking-tight text-zinc-100 mb-6 leading-snug">
+            {question[`text_${lang}`] ?? question.text}
+          </p>
+          <button onClick={() => setAnswersCollapsed(c => !c)} className="w-full flex items-center justify-between py-2 text-zinc-500 hover:text-zinc-300 transition-colors mb-2">
+            <span className="text-white text-[11px] font-bold uppercase tracking-widest">{isVoteQuestion ? 'Vote Breakdown' : 'Answers'}</span>
+            <div className="flex items-center gap-2">
+              {!isFetchingAnswers && (groupAnswers?.length > 0) && <span className="bg-white/10 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/10">{groupAnswers.length}</span>}
+              {answersCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
             </div>
-          )}
-          {messages.map(msg => <ChatBubble key={msg.id} msg={msg} isMe={msg.user_id === user.id} serverUrl={SERVER_URL} />)}
-          <AnimatePresence>
-            {typingUsers.length > 0 && (
-              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="flex items-center gap-2">
-                <div className="flex gap-1 bg-zinc-800/80 px-3 py-2 rounded-full border border-white/5">
-                  {[0, 0.2, 0.4].map((delay, i) => <motion.div key={i} animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay }} className="w-1.5 h-1.5 bg-zinc-400 rounded-full" />)}
-                </div>
-                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{typingUsers[0].name} is typing…</span>
-              </motion.div>
-            )}
-          </AnimatePresence>
-          <div ref={chatEndRef} />
-        </div>
-      </motion.div>
-
-      {/* Floating Quick Reactions */}
-      <div className="flex items-center justify-center gap-2 flex-wrap">
-        {REACTIONS.map(r => (
-          <motion.button
-            key={r.label}
-            whileHover={{ y: -3, scale: 1.1 }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => handleSendReaction(r.emoji)}
-            className="bg-zinc-900/80 border border-white/10 hover:border-white/30 text-xs px-3 py-1.5 rounded-full backdrop-blur-md cursor-pointer transition-all"
-          >
-            {r.emoji}
-          </motion.button>
-        ))}
-      </div>
-
-      {/* GIF Picker */}
-      <AnimatePresence>
-        {showGifPicker && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: 0.2 }}
-            className="bg-zinc-950/95 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
-            <div className="flex items-center gap-2 mb-3">
-              <input value={gifQuery} onChange={e => handleGifQueryChange(e.target.value)} placeholder={text.searchGifs ?? 'Search GIFs…'} autoFocus className="flex-1 bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-bold outline-none focus:border-white/30 transition-colors" />
-              <button onClick={() => { setShowGifPicker(false); setGifQuery(''); setGifs([]) }} className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-800/80 border border-white/10 text-zinc-400 hover:text-white transition-all"><X size={16} /></button>
-            </div>
-            <div className="h-36 overflow-y-auto grid grid-cols-3 gap-2">
-              {isSearchingGifs ? <div className="col-span-3 flex justify-center items-center py-4"><Loader2 className="animate-spin text-zinc-400" size={20} /></div>
-              : gifs.length === 0 ? <div className="col-span-3 flex justify-center items-center py-4"><p className="text-zinc-600 text-xs">{gifQuery ? 'No results' : 'Type to search'}</p></div>
-              : gifs.map(gif => <button key={gif.id} onClick={() => handleSendGif(gif.images.fixed_height.url)} className="rounded-xl overflow-hidden h-20 w-full bg-zinc-800/80 border border-white/10 active:scale-95 transition-all"><img src={gif.images.fixed_height.url} alt="gif" className="w-full h-full object-cover" /></button>)}
+          </button>
+          <motion.div animate={{ height: answersCollapsed ? 0 : 'auto' }} transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ overflow: 'hidden' }}>
+            <div className="pt-2">
+              {isFetchingAnswers ? <div className="flex justify-center py-8"><Loader2 size={22} className="text-zinc-400 animate-spin" /></div>
+              : !groupAnswers || groupAnswers.length === 0 ? <p className="text-zinc-600 text-sm text-center py-8">No answers yet — be the first!</p>
+              : isVoteQuestion ? <VoteBreakdown answers={groupAnswers} groupMembers={group?.members} serverUrl={SERVER_URL} revealed={revealed} />
+              : <div className="space-y-3">{groupAnswers.map((ans, i) => <AnswerCard key={ans.user_id} ans={ans} index={i} isMe={ans.user_id === user.id} revealed={revealed} serverUrl={SERVER_URL} />)}</div>}
             </div>
           </motion.div>
-        )}
-      </AnimatePresence>
+        </motion.div>
 
-      {/* Floating Input Pill */}
-      <div className="relative flex items-center bg-zinc-900/90 border border-white/10 focus-within:border-white/30 rounded-full p-2 pl-5 shadow-2xl transition-all">
-        <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
-        <button onClick={() => { playSFX('click'); fileInputRef.current?.click() }} disabled={isUploading} className="p-1.5 text-zinc-400 hover:text-white transition-colors shrink-0">
-          {isUploading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
-        </button>
-        <button onClick={() => { playSFX('click'); setShowGifPicker(p => !p) }} className={`p-1.5 transition-colors shrink-0 ${showGifPicker ? 'text-white' : 'text-zinc-400 hover:text-white'}`}>
-          <Smile size={18} />
-        </button>
-        <textarea
-          value={messageInput}
-          onChange={handleTyping}
-          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendText() } }}
-          placeholder={text.typeMessage ?? 'Say something…'}
-          rows="1"
-          spellCheck="false"
-          className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none resize-none py-2 px-2 overflow-hidden h-[42px] block"
-        />
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.92 }}
-          onClick={handleSendText}
-          className="w-10 h-10 rounded-full bg-white text-zinc-950 flex items-center justify-center shrink-0 shadow-md"
+        {/* Live Chat Glass Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.05 }}
+          className="bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 flex flex-col"
         >
-          <Send size={16} className="relative right-px" />
-        </motion.button>
+          <div className="flex items-center gap-3 mb-4 flex-shrink-0">
+            <div className="h-px flex-1 bg-white/10" />
+            <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">{text.liveChat ?? 'Live Chat'}</span>
+            <div className="h-px flex-1 bg-white/10" />
+          </div>
+          <div ref={chatScrollRef} className="flex-1 min-h-0 overflow-y-auto space-y-3 mb-4" style={{ scrollbarWidth: 'none' }}>
+            {messages.length === 0 && (
+              <div className="flex items-center justify-center h-full min-h-[120px]">
+                {/* PILLAR 3: Terminal pill with radar ping */}
+                <span className="font-mono text-xs text-zinc-500 bg-zinc-950/50 border border-white/5 px-4 py-2 rounded-full mx-auto animate-pulse relative">
+                  <span className="absolute inset-0 rounded-full bg-white/5 animate-ping" />
+                  <span className="relative">No messages yet. Start the chaos ↓</span>
+                </span>
+              </div>
+            )}
+            {messages.map(msg => <ChatBubble key={msg.id} msg={msg} isMe={msg.user_id === user.id} serverUrl={SERVER_URL} />)}
+            <AnimatePresence>
+              {typingUsers.length > 0 && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="flex items-center gap-2">
+                  <div className="flex gap-1 bg-zinc-800/80 px-3 py-2 rounded-full border border-white/5">
+                    {[0, 0.2, 0.4].map((delay, i) => <motion.div key={i} animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay }} className="w-1.5 h-1.5 bg-zinc-400 rounded-full" />)}
+                  </div>
+                  <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{typingUsers[0].name} is typing…</span>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            <div ref={chatEndRef} />
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Bottom toolbar — flex-shrink-0, stays pinned to bottom */}
+      <div className="flex-shrink-0 space-y-2 pt-2">
+        {/* Floating Quick Reactions */}
+        <div className="flex items-center justify-center gap-2 flex-wrap">
+          {REACTIONS.map(r => (
+            <motion.button
+              key={r.label}
+              whileHover={{ y: -3, scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => handleSendReaction(r.emoji)}
+              className="bg-zinc-900/80 border border-white/10 hover:border-white/30 text-xs px-3 py-1.5 rounded-full backdrop-blur-md cursor-pointer transition-all"
+            >
+              {r.emoji}
+            </motion.button>
+          ))}
+        </div>
+
+        {/* GIF Picker */}
+        <AnimatePresence>
+          {showGifPicker && (
+            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: 0.2 }}
+              className="bg-zinc-950/95 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+              <div className="flex items-center gap-2 mb-3">
+                <input value={gifQuery} onChange={e => handleGifQueryChange(e.target.value)} placeholder={text.searchGifs ?? 'Search GIFs…'} autoFocus className="flex-1 bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-bold outline-none focus:border-white/30 transition-colors" />
+                <button onClick={() => { setShowGifPicker(false); setGifQuery(''); setGifs([]) }} className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-800/80 border border-white/10 text-zinc-400 hover:text-white transition-all"><X size={16} /></button>
+              </div>
+              <div className="h-36 overflow-y-auto grid grid-cols-3 gap-2">
+                {isSearchingGifs ? <div className="col-span-3 flex justify-center items-center py-4"><Loader2 className="animate-spin text-zinc-400" size={20} /></div>
+                : gifs.length === 0 ? <div className="col-span-3 flex justify-center items-center py-4"><p className="text-zinc-600 text-xs">{gifQuery ? 'No results' : 'Type to search'}</p></div>
+                : gifs.map(gif => <button key={gif.id} onClick={() => handleSendGif(gif.images.fixed_height.url)} className="rounded-xl overflow-hidden h-20 w-full bg-zinc-800/80 border border-white/10 active:scale-95 transition-all"><img src={gif.images.fixed_height.url} alt="gif" className="w-full h-full object-cover" /></button>)}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Floating Input Pill */}
+        <div className="relative flex items-center bg-zinc-900/90 border border-white/10 focus-within:border-white/30 rounded-full p-2 pl-5 shadow-2xl transition-all mb-1">
+          <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
+          <button onClick={() => { playSFX('click'); fileInputRef.current?.click() }} disabled={isUploading} className="p-1.5 text-zinc-400 hover:text-white transition-colors shrink-0">
+            {isUploading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+          </button>
+          <button onClick={() => { playSFX('click'); setShowGifPicker(p => !p) }} className={`p-1.5 transition-colors shrink-0 ${showGifPicker ? 'text-white' : 'text-zinc-400 hover:text-white'}`}>
+            <Smile size={18} />
+          </button>
+          <textarea
+            value={messageInput}
+            onChange={handleTyping}
+            onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendText() } }}
+            placeholder={text.typeMessage ?? 'Say something…'}
+            rows="1"
+            spellCheck="false"
+            className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none resize-none py-2 px-2 overflow-hidden h-[42px] block"
+          />
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.92 }}
+            onClick={handleSendText}
+            className="w-10 h-10 rounded-full bg-white text-zinc-950 flex items-center justify-center shrink-0 shadow-md"
+          >
+            <Send size={16} className="relative right-px" />
+          </motion.button>
+        </div>
       </div>
     </div>
   )

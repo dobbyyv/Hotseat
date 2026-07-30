@@ -194,7 +194,7 @@ function App() {
         </svg>
 
         {/* Foreground container — responsive, centered */}
-        <div className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-12 min-h-screen">
+        <div className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-12 h-full">
           <AnimatedRoutes />
         </div>
 
