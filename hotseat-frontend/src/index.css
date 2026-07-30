@@ -1,6 +1,6 @@
 @import 'tailwindcss';
 
-/* ───── Vercel/Linear-Inspired Design System ───── */
+
 @theme {
   --font-display: 'Space Grotesk', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
@@ -28,7 +28,7 @@
   }
 }
 
-/* ───── Custom scrollbar ───── */
+//Custom scrollbar 
 ::-webkit-scrollbar {
   width: 5px;
 }
@@ -73,27 +73,3 @@ button:focus-visible {
   100% { background-position: -200% 0; }
 }
 
-/* ───── Ambient depth orb drift ───── */
-@keyframes drift-orb-1 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(8vw, 6vh) scale(1.08); }
-}
-
-@keyframes drift-orb-2 {
-  0% { transform: translate(0, 0) scale(1); }
-  100% { transform: translate(-6vw, -10vh) scale(1.05); }
-}
-
-@keyframes drift-orb-3 {
-  0% { transform: translate(-50%, -50%) scale(1); }
-  100% { transform: translate(-50%, -50%) scale(1.1) translate(4vw, -3vh); }
-}
-
-/* ───── Ultra-slow fluid ambient drift ───── */
-@keyframes ambient-drift {
-  0% { background-position: 0% 0%; }
-  25% { background-position: 40% 15%; }
-  50% { background-position: 25% 60%; }
-  75% { background-position: 70% 40%; }
-  100% { background-position: 100% 80%; }
-}
