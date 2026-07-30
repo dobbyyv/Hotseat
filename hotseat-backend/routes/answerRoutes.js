@@ -5,17 +5,96 @@ const { broadcastToGroup } = require('../sockets/socketHandler');
 
 const router = express.Router();
 
+/**
+ * Normalizes a question's ui_type to a canonical interaction type.
+ *
+ * Recognized canonical types:
+ *   - 'text'       → open-ended text response (scenarios, creative writing)
+ *   - 'vote_member' → select a group member (nominations, "who is most likely")
+ *   - 'choice'     → pick from predefined options (this-or-that, A/B/C)
+ *   - 'slider'     → 0–100 scale (confidence, agreement)
+ *
+ * Legacy aliases (mapped automatically):
+ *   'tag' → 'vote_member'
+ *   'open_ended', 'scenario' → 'text'
+ *
+ * If ui_type is null/undefined, the function infers the type from question
+ * content using keyword heuristics as a last resort.
+ */
+function normalizeQuestionType(question) {
+  const raw = (question.ui_type || '').toLowerCase().trim();
+
+  // Explicitly mapped legacy types
+  const ALIAS_MAP = {
+    'tag':          'vote_member',
+    'vote':         'vote_member',
+    'vote_member':  'vote_member',
+    'nomination':   'vote_member',
+    'text':         'text',
+    'open_ended':   'text',
+    'scenario':     'text',
+    'open':         'text',
+    'choice':       'choice',
+    'multiple':     'choice',
+    'slider':       'slider',
+    'scale':        'slider',
+    'range':        'slider',
+  };
+
+  if (ALIAS_MAP[raw]) return ALIAS_MAP[raw];
+
+  // Inference fallback — only reached if ui_type is null/unknown
+  const text = ((question.injected_text || question.text || '') + ' ' +
+                (question.injected_text_it || question.text_it || '')).toLowerCase();
+
+  // Heuristic: member-nomination patterns
+  const nominationPatterns = [
+    'who is most likely', 'who would be the first', 'chi è più probabile',
+    'who would', 'which friend', 'pick a member', 'tag a friend',
+    'choose someone', 'point at', 'nominate', 'seleziona',
+    '{target}', 'most likely to', 'qualcuno che',
+  ];
+  if (nominationPatterns.some(p => text.includes(p))) {
+    return 'vote_member';
+  }
+
+  // Heuristic: scale/slider patterns
+  const scalePatterns = [
+    'on a scale', 'how confident', 'da 1 a 10', 'su una scala',
+    'rate your', 'valuta', 'from 0 to 100',
+  ];
+  if (scalePatterns.some(p => text.includes(p))) {
+    return 'slider';
+  }
+
+  // Heuristic: choice patterns (this-or-that)
+  const choicePatterns = [
+    'this or that', 'would you rather', 'preferiresti',
+    'a or b', 'pick one', 'scegli',
+  ];
+  if (choicePatterns.some(p => text.includes(p))) {
+    return 'choice';
+  }
+
+  // Default: text (open-ended scenario)
+  return 'text';
+}
+
 // GET /api/daily-question — return the currently active question
 router.get('/daily-question', async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM questions WHERE is_active = true");
     if (result.rows.length === 0) return res.status(404).json({ error: "No active question" });
     const q = result.rows[0];
+
+    const normalizedType = normalizeQuestionType(q);
+
     res.json({
       ...q,
       text: q.injected_text || q.text,
       text_it: q.injected_text_it || q.text_it,
-      type: q.ui_type
+      ui_type: normalizedType,               // canonical type for frontend rendering
+      raw_type: q.ui_type,                    // preserve original DB value for debugging
     });
   } catch (err) {
     console.error(err);

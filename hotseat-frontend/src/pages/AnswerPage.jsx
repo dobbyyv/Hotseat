@@ -37,20 +37,22 @@ export default function AnswerPage() {
   const handleSubmit = async () => {
     setSubmitError(null); setIsSubmitting(true); playSFX('click')
     let final
-    if (question.ui_type === 'text') final = answer
-    if (question.ui_type === 'choice') final = selected
-    if (question.ui_type === 'slider') final = `${sliderVal}/100`
-    if (question.ui_type === 'tag') final = taggedFriend?.name
+    const type = question.ui_type
+    if (type === 'text') final = answer
+    if (type === 'choice') final = selected
+    if (type === 'slider') final = `${sliderVal}/100`
+    if (type === 'vote_member' || type === 'tag') final = taggedFriend?.name
     const success = await submitAnswer(final); setIsSubmitting(false)
     if (success) { playSFX('success'); setSubmitted(true); setTimeout(() => navigate('/results'), 1800) }
     else { playSFX('error'); setSubmitError(useStore.getState().error || "Failed to submit.") }
   }
 
   const canSubmit = () => {
-    if (question.ui_type === 'text') return answer.trim().length > 0
-    if (question.ui_type === 'choice') return selected !== null
-    if (question.ui_type === 'slider') return true
-    if (question.ui_type === 'tag') return taggedFriend !== null
+    const type = question.ui_type
+    if (type === 'text') return answer.trim().length > 0
+    if (type === 'choice') return selected !== null
+    if (type === 'slider') return true
+    if (type === 'vote_member' || type === 'tag') return taggedFriend !== null
     return false
   }
 
@@ -97,7 +99,7 @@ export default function AnswerPage() {
           </div>
         )}
 
-        {question.ui_type === 'tag' && (
+        {(question.ui_type === 'vote_member' || question.ui_type === 'tag') && (
           <div className="flex flex-col gap-3">
             {group?.members?.map(friend => (
               <motion.button key={friend.id} whileTap={{ scale: 0.97 }} onClick={() => { playSFX('click'); setTaggedFriend(friend) }}
