@@ -1,8 +1,7 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
 
-import SpatialCanvas from './components/SpatialCanvas'
 import BottomNav from './components/BottomNav'
 
 import JoinPage from './pages/JoinPage'
@@ -23,15 +22,6 @@ function App() {
   
   const hasIdentity = !!user;
   const isFullyAuthenticated = hasIdentity && !!activeGroup;
-
-  // 🖱️ Mouse position tracking — normalized from -1 to 1
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
-
-  const handleMouseMove = useCallback((e) => {
-    const x = (e.clientX / window.innerWidth) * 2 - 1   // -1 .. 1
-    const y = -(e.clientY / window.innerHeight) * 2 + 1  // -1 .. 1 (invert Y for natural feel)
-    setMousePos({ x, y })
-  }, [])
 
   // Global WebSocket connection for real-time group updates
   useEffect(() => {
@@ -62,42 +52,46 @@ function App() {
 
   return (
     <BrowserRouter>
-      <div
-        onMouseMove={handleMouseMove}
-        className="relative min-h-screen overflow-x-hidden"
-      >
-        {/* WebGL background — particle void with mouse-driven parallax */}
-        <SpatialCanvas mousePos={mousePos} />
+      <main className="relative min-h-screen w-full bg-[#09090b] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white">
+        {/* High-tech fading grid background */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            backgroundImage:
+              'linear-gradient(to right, rgba(79,79,79,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,79,79,0.18) 1px, transparent 1px)',
+            backgroundSize: '14px 24px',
+            maskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
+          }}
+        />
 
-        {/* 2D foreground — crisp, responsive, mobile-first */}
-        <div className="relative z-10 min-h-screen w-full flex items-center justify-center p-4 sm:p-8 pointer-events-auto">
-          <div className="w-full max-w-xl bg-zinc-950/60 backdrop-blur-3xl border border-white/10 shadow-[0_0_80px_rgba(0,0,0,0.8)] rounded-3xl p-6 sm:p-10">
-            <Routes>
-              <Route 
-                path="/" 
-                element={hasIdentity ? <Navigate to="/hub" /> : <JoinPage />} 
-              />
-              
-              <Route 
-                path="/hub" 
-                element={hasIdentity ? <HubPage /> : <Navigate to="/" />} 
-              />
+        {/* Foreground container — responsive, centered */}
+        <div className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-12 min-h-screen">
+          <Routes>
+            <Route 
+              path="/" 
+              element={hasIdentity ? <Navigate to="/hub" /> : <JoinPage />} 
+            />
+            
+            <Route 
+              path="/hub" 
+              element={hasIdentity ? <HubPage /> : <Navigate to="/" />} 
+            />
 
-              <Route path="/home" element={isFullyAuthenticated ? <HomePage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-              <Route path="/answer" element={isFullyAuthenticated ? <AnswerPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-              <Route path="/results" element={isFullyAuthenticated ? <ResultsPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-              <Route path="/profile" element={hasIdentity ? <ProfilePage /> : <Navigate to="/" />} />
-              <Route path="/manage-group" element={isFullyAuthenticated ? <ManageGroup /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-              <Route path="/info" element={isFullyAuthenticated ? <InfoPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-              
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
-          </div>
+            <Route path="/home" element={isFullyAuthenticated ? <HomePage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+            <Route path="/answer" element={isFullyAuthenticated ? <AnswerPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+            <Route path="/results" element={isFullyAuthenticated ? <ResultsPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+            <Route path="/profile" element={hasIdentity ? <ProfilePage /> : <Navigate to="/" />} />
+            <Route path="/manage-group" element={isFullyAuthenticated ? <ManageGroup /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+            <Route path="/info" element={isFullyAuthenticated ? <InfoPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+            
+            <Route path="*" element={<Navigate to="/" />} />
+          </Routes>
         </div>
 
-        {/* Bottom navigation — 2D DOM, z-50, untouched by WebGL */}
+        {/* Bottom navigation — always on top */}
         <BottomNav />
-      </div>
+      </main>
     </BrowserRouter>
   )
 }
