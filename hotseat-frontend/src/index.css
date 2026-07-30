@@ -74,3 +74,11 @@ button:focus-visible {
   100% { background-position: -200% 0; }
 }
 
+/* ───── Invisible scrollbar — keeps the aesthetic clean ───── */
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
