@@ -371,7 +371,7 @@ export default function ResultsPage() {
             placeholder={text.typeMessage ?? 'Say something…'}
             rows="1"
             spellCheck="false"
-            className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none resize-none py-2 px-2 overflow-hidden h-[42px] block"
+            className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none resize-none py-2 px-2 overflow-hidden h-[42px] block select-text"
           />
           <motion.button
             whileHover={{ scale: 1.05 }}

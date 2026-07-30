@@ -239,7 +239,7 @@ export default function HomePage() {
                     <div className="w-11 h-11 bg-white/5 border border-white/10 rounded-2xl flex items-center justify-center text-zinc-300 mb-4"><Lightbulb size={22} /></div>
                     <h3 className="text-xl font-display font-bold text-white mb-1">{suggestText.suggestTitle}</h3>
                     <p className="text-zinc-400 text-xs leading-relaxed mb-5 font-medium">{suggestText.suggestDesc}</p>
-                    <textarea value={suggestionText} onChange={(e) => { setSuggestionText(e.target.value); if (suggestionStatus === 'error') setSuggestionStatus('idle') }} placeholder={suggestText.placeholder} className="w-full h-28 bg-zinc-800/60 border border-white/10 focus:border-white/30 rounded-2xl p-4 text-white text-sm outline-none transition-all resize-none mb-3" />
+                    <textarea value={suggestionText} onChange={(e) => { setSuggestionText(e.target.value); if (suggestionStatus === 'error') setSuggestionStatus('idle') }} placeholder={suggestText.placeholder} className="w-full h-28 bg-zinc-800/60 border border-white/10 focus:border-white/30 rounded-2xl p-4 text-white text-sm outline-none transition-all resize-none mb-3 select-text" />
                     <div className="flex justify-end mb-3"><span className={`text-xs font-mono font-bold ${suggestionText.length > 200 ? 'text-amber-400' : 'text-zinc-600'}`}>{suggestionText.length}/300</span></div>
                     <AnimatePresence>
                       {suggestionStatus === 'error' && (

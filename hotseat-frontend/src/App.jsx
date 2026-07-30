@@ -117,40 +117,24 @@ function App() {
     <BrowserRouter>
       <main
         ref={containerRef}
-        className="relative h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
+        className="relative h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans select-none"
         style={{
           // Default CSS custom properties for spotlight/grid (updated via native mousemove)
           '--mx': '50%',
           '--my': '50%',
         }}
       >
-        {/* ═══════════════════════════════════════════
-            LAYER 1 — Static Ambient Depth Orbs
-            Deeply blurred, perfectly stationary spheres
-            that banish the dead black void and give
-            organic 3D depth. No movement — calm stability.
-            ═══════════════════════════════════════════ */}
+        {/* Ambient depth orbs */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-zinc-800/12 blur-[160px] pointer-events-none" />
           <div className="absolute bottom-[-20%] right-[-10%] w-[55vw] h-[55vw] rounded-full bg-slate-900/18 blur-[160px] pointer-events-none" />
           <div className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vw] rounded-full bg-zinc-700/08 blur-[140px] pointer-events-none" />
         </div>
 
-        {/* ═══════════════════════════════════════════
-            LAYER 2 — Interactive Physics Orbs (Canvas)
-            12 glowing orbs with wall bounce, elastic
-            collisions, and grab/fling interaction.
-            Zero frames dropped — pure rAF loop.
-            ═══════════════════════════════════════════ */}
+        {/* Interactive physics orbs */}
         <OrbField />
 
-        {/* ═══════════════════════════════════════════
-            LAYER 3 — Crisp Technical Grid (18px)
-            2x denser than before, higher opacity for
-            visible blueprint texture. Revealed around
-            the cursor via --mx/--my CSS custom properties
-            updated natively (zero React re-renders).
-            ═══════════════════════════════════════════ */}
+        {/* Spotlight grid */}
         <div
           className="absolute inset-0 z-[5] pointer-events-none"
           style={{
@@ -163,13 +147,7 @@ function App() {
           }}
         />
 
-        {/* ═══════════════════════════════════════════
-            LAYER 4 — Instant Cursor Torch (Zero Lag)
-            180px warm spotlight that tracks the cursor
-            via CSS custom properties (--mx, --my)
-            updated directly on the DOM element — React
-            never re-renders, zero frames of latency.
-            ═══════════════════════════════════════════ */}
+        {/* Cursor torch */}
         <div
           className="absolute inset-0 z-[5] pointer-events-none"
           style={{
@@ -177,12 +155,7 @@ function App() {
           }}
         />
 
-        {/* ═══════════════════════════════════════════
-            LAYER 5 — Cinematic Film Grain (SVG Noise)
-            Fixed overlay that eliminates digital color
-            banding and gives the dark background physical
-            texture — like a 35mm print.
-            ═══════════════════════════════════════════ */}
+        {/* Film grain */}
         <svg
           className="fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay pointer-events-none"
           aria-hidden="true"
