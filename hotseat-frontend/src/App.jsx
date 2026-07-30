@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
 
+import SpatialCanvas from './components/SpatialCanvas'
+
 import JoinPage from './pages/JoinPage'
 import HubPage from './pages/HubPage'
 import HomePage from './pages/HomePage'
@@ -50,6 +52,7 @@ function App() {
 
   return (
     <BrowserRouter>
+      <SpatialCanvas />
       <Routes>
         <Route 
           path="/" 
