@@ -5,6 +5,7 @@ import { ArrowRight, Sparkles, Users, AlertCircle, Loader2, LogIn } from 'lucide
 import useStore from '../store/useStore'
 import { t } from '../translations'
 import useSFX from '../useSFX'
+import useTypingEffect from '../hooks/useTypingEffect'
 
 // Memoized to avoid expensive re-renders during user input.
 const AmbientBackground = memo(() => (
@@ -47,6 +48,20 @@ export default function JoinPage() {
   }, [playSFX])
 
   const text = t[lang]?.join || t['en']?.join || {}
+
+  // Typing effect for main descriptive texts
+  const tagline = "Your friend group, every single day."
+  const typedTagline = useTypingEffect(tagline, 30)
+
+  const step0Title = "What's your name?"
+  const typedStep0Title = useTypingEffect(step0Title, 40, step === 0)
+  const step0Desc = "This is how your friends will see you."
+  const typedStep0Desc = useTypingEffect(step0Desc, 30, step === 0)
+
+  const step1Title = "Join your group"
+  const typedStep1Title = useTypingEffect(step1Title, 40, step === 1)
+  const step1Desc = "Enter the invite code, or start a new group."
+  const typedStep1Desc = useTypingEffect(step1Desc, 30, step === 1)
 
   const handleName = (e) => {
     e?.preventDefault()
@@ -109,7 +124,7 @@ export default function JoinPage() {
             </div>
             <span className="text-white text-3xl font-bold font-display tracking-tight drop-shadow-md">Hotseat</span>
           </div>
-          <p className="text-gray-400 text-sm font-medium">Your friend group, every single day.</p>
+          <p className="text-gray-400 text-sm font-medium">{typedTagline}<span className="animate-pulse text-violet-400">|</span></p>
         </motion.div>
 
         <AnimatePresence mode="wait">
@@ -181,8 +196,8 @@ export default function JoinPage() {
               onSubmit={handleName}
               className="w-full bg-white/[0.03] backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-[0_4px_30px_rgba(0,0,0,0.5)]"
             >
-              <h1 className="text-white text-2xl font-bold font-display mb-2 tracking-tight">What's your name?</h1>
-              <p className="text-gray-400 text-xs mb-6 font-medium">This is how your friends will see you.</p>
+              <h1 className="text-white text-2xl font-bold font-display mb-2 tracking-tight">{typedStep0Title}<span className="animate-pulse text-violet-400">|</span></h1>
+              <p className="text-gray-400 text-xs mb-6 font-medium">{typedStep0Desc}<span className="animate-pulse text-violet-400">|</span></p>
               
               <input
                 type="text" 
@@ -231,8 +246,8 @@ export default function JoinPage() {
                 <ArrowRight className="rotate-180" size={20} />
               </button>
 
-              <h1 className="text-white text-2xl font-bold font-display mb-2 tracking-tight">Join your group</h1>
-              <p className="text-gray-400 text-xs mb-6 font-medium">Enter the invite code, or start a new group.</p>
+              <h1 className="text-white text-2xl font-bold font-display mb-2 tracking-tight">{typedStep1Title}<span className="animate-pulse text-violet-400">|</span></h1>
+              <p className="text-gray-400 text-xs mb-6 font-medium">{typedStep1Desc}<span className="animate-pulse text-violet-400">|</span></p>
       
               {error && (
                 <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold px-4 py-3 rounded-xl mb-5 flex items-center gap-2">

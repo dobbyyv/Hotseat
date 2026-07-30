@@ -307,7 +307,7 @@ export default function HomePage() {
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => {
-                playSFX('success');
+                playSFX('woosh');
                 navigate('/answer');
               }}
               className="w-full relative overflow-hidden bg-violet-600/30 backdrop-blur-md border border-violet-500/50 text-violet-100 font-bold py-5 rounded-2xl flex items-center justify-center gap-2 text-lg font-display shadow-[0_0_30px_rgba(139,92,246,0.2)] group hover:bg-violet-600/40 transition-all"
@@ -319,7 +319,7 @@ export default function HomePage() {
             <motion.button
               whileTap={{ scale: 0.97 }}
               onClick={() => {
-                playSFX('success');
+                playSFX('woosh');
                 navigate('/results');
               }}
               className="w-full bg-white/5 backdrop-blur-md border border-white/10 text-gray-200 font-bold py-5 rounded-2xl flex items-center justify-center gap-2 text-lg font-display hover:bg-white/10 hover:border-white/20 transition-all shadow-[0_0_20px_rgba(0,0,0,0.5)]"

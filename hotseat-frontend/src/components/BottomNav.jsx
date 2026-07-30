@@ -18,13 +18,13 @@ export default function BottomNav({ active }) {
   ]
 
   const handleNavigation = (tab) => {
-    // 🛑 Block navigation if the tab requires a group but we are in the Hub
+    // Block navigation if the tab requires a group but we are in the Hub
     if (tab.requiresGroup && !group) {
       playSFX('error'); // Play an error/thud sound if you have one
       return;
     }
 
-    playSFX('click');
+    playSFX(tab.id === 'hub' || tab.id === 'info' || tab.id === 'profile' ? 'woosh' : 'click');
     
     if (tab.id === 'hub') {
       clearActiveGroup();

@@ -5,6 +5,7 @@ import { LogOut, Camera, Loader2, Key, Edit2, Check, X, Settings, CheckCircle, S
 import useStore from '../store/useStore'
 import BottomNav from '../components/BottomNav'
 import useSFX from '../useSFX'
+import useTypingEffect from '../hooks/useTypingEffect'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -15,7 +16,7 @@ export default function ProfilePage() {
   const fileInputRef = useRef(null)
   const playSFX = useSFX()
 
-  // 🌍 Built-in Translation Dictionary (Bulletproof)
+  // Built-in Translation Dictionary (Bulletproof)
   const dict = {
     title: lang === 'it' ? 'Profilo' : 'Profile',
     accountRecovery: lang === 'it' ? 'Recupero Account' : 'Account Recovery',
@@ -57,6 +58,9 @@ export default function ProfilePage() {
   useEffect(() => {
     if (group) setEditName(group.name)
   }, [group])
+
+  // Typing effect for group name display
+  const typedGroupName = useTypingEffect(group?.name || '', 50)
 
   if (!user) return null
 
@@ -149,9 +153,8 @@ export default function ProfilePage() {
     navigate('/')
   }
 
-  // ==========================================
   // RENDER
-  // ==========================================
+  
   return (
     <div className="min-h-screen bg-black pb-32 relative overflow-y-auto overflow-x-hidden text-white font-sans">
       
@@ -315,7 +318,7 @@ export default function ProfilePage() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
-                        <span className="text-white font-bold font-display text-2xl tracking-tight">{group?.name}</span>
+                        <span className="text-white font-bold font-display text-2xl tracking-tight">{typedGroupName}<span className="animate-pulse text-violet-400">|</span></span>
                         <button onClick={() => { playSFX('click'); setIsEditing(true) }} className="text-gray-500 hover:text-violet-400 transition-colors p-2 bg-white/5 rounded-full">
                           <Edit2 size={14} />
                         </button>
