@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 import { io } from 'socket.io-client'
 import useStore from '../store/useStore'
-import BottomNav from '../components/BottomNav'
 import { t } from '../translations'
 import { subscribeToPushNotifications } from '../pushUtility'
 import useSFX from '../useSFX'
@@ -426,7 +425,6 @@ export default function ResultsPage() {
           Go Answer
         </button>
       </div>
-      <BottomNav active="results" />
     </div>
   )
 
@@ -698,7 +696,6 @@ export default function ResultsPage() {
       {/* Bottom nav spacer — Pushes the input bar UP so BottomNav doesn't hide it */}
 <div className="shrink-0 h-24" />
 
-      <BottomNav active="results" />
     </div>
   )
 }

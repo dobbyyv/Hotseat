@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { LogOut, Camera, Loader2, Key, Edit2, Check, X, Settings, CheckCircle, ShieldAlert, ShieldCheck } from 'lucide-react'
 import useStore from '../store/useStore'
-import BottomNav from '../components/BottomNav'
 import useSFX from '../useSFX'
 import useTypingEffect from '../hooks/useTypingEffect'
 
@@ -405,7 +404,6 @@ export default function ProfilePage() {
         )}
       </AnimatePresence>
 
-      <BottomNav active="profile" />
     </div>
   )
 }

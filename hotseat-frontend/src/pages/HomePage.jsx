@@ -7,7 +7,6 @@ import {
 } from 'lucide-react'
 import { io } from 'socket.io-client'
 import useStore from '../store/useStore'
-import BottomNav from '../components/BottomNav'
 import { t } from '../translations'
 import useSFX from '../useSFX' 
 
@@ -477,7 +476,6 @@ export default function HomePage() {
         )}
       </AnimatePresence>
 
-      <BottomNav active="home" />
     </div>
   )
 }

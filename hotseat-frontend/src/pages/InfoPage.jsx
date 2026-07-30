@@ -2,13 +2,12 @@ import { useState, useEffect, memo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, History, CalendarDays, BarChart2 } from 'lucide-react'
 import useStore from '../store/useStore'
-import BottomNav from '../components/BottomNav'
 import { t } from '../translations'
 import useSFX from '../useSFX'
 
 const API = import.meta.env.VITE_SERVER_URL ? import.meta.env.VITE_SERVER_URL.replace(/\/+$/, '') : '';
 
-// 🛡️ THE LAG KILLER: Extracted, memoized static background
+// THE LAG KILLER: Extracted, memoized static background
 const AmbientBackground = memo(() => (
   <div className="fixed inset-0 pointer-events-none z-0">
     <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom,_#2e1065_0%,_#000000_80%)] opacity-70" />
@@ -404,7 +403,6 @@ export default function InfoPage() {
         </div>
       </div>
 
-      <BottomNav active="info" />
     </div>
   )
 }

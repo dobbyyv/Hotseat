@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
 
 import SpatialCanvas from './components/SpatialCanvas'
+import BottomNav from './components/BottomNav'
 
 import JoinPage from './pages/JoinPage'
 import HubPage from './pages/HubPage'
@@ -52,7 +53,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <SpatialCanvas />
+      <SpatialCanvas>
       <Routes>
         <Route 
           path="/" 
@@ -73,6 +74,8 @@ function App() {
         
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
+      </SpatialCanvas>
+      <BottomNav />
     </BrowserRouter>
   )
 }

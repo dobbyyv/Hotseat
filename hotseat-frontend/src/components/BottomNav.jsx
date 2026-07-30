@@ -1,36 +1,45 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { Home, MessageSquare, User, BarChart2, LayoutGrid, Lock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import useStore from '../store/useStore'
 import useSFX from '../useSFX'
 
-export default function BottomNav({ active }) {
+const MAPPING = {
+  '/hub':     'hub',
+  '/home':    'home',
+  '/results': 'results',
+  '/info':    'info',
+  '/profile': 'profile',
+}
+
+export default function BottomNav() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { clearActiveGroup, group } = useStore()
   const playSFX = useSFX()
 
+  // Auto-detect active tab from current path
+  const active = MAPPING[location.pathname] || null
+
   const tabs = [
-    { id: 'hub', icon: LayoutGrid, label: 'Groups', path: '/hub', requiresGroup: false },
-    { id: 'home', icon: Home, label: 'Today', path: '/home', requiresGroup: true },
-    { id: 'results', icon: MessageSquare, label: 'Results', path: '/results', requiresGroup: true },
-    { id: 'info', icon: BarChart2, label: 'Stats', path: '/info', requiresGroup: true },
-    { id: 'profile', icon: User, label: 'Profile', path: '/profile', requiresGroup: false }
+    { id: 'hub',     icon: LayoutGrid,     label: 'Groups',  path: '/hub',     requiresGroup: false },
+    { id: 'home',    icon: Home,           label: 'Today',   path: '/home',    requiresGroup: true  },
+    { id: 'results', icon: MessageSquare,  label: 'Results', path: '/results', requiresGroup: true  },
+    { id: 'info',    icon: BarChart2,      label: 'Stats',   path: '/info',    requiresGroup: true  },
+    { id: 'profile', icon: User,           label: 'Profile', path: '/profile', requiresGroup: false },
   ]
 
   const handleNavigation = (tab) => {
-    // Block navigation if the tab requires a group but we are in the Hub
     if (tab.requiresGroup && !group) {
-      playSFX('error'); // Play an error/thud sound if you have one
-      return;
+      playSFX('error')
+      return
     }
-
-    playSFX('woosh');
-    
+    playSFX('woosh')
     if (tab.id === 'hub') {
-      clearActiveGroup();
-      navigate('/hub');
+      clearActiveGroup()
+      navigate('/hub')
     } else {
-      navigate(tab.path);
+      navigate(tab.path)
     }
   }
 

@@ -4,8 +4,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Users, Plus, Hash, LogOut, ChevronRight, AlertCircle, X, Sparkles, PenLine, Globe } from 'lucide-react'
 import useStore from '../store/useStore'
 import useSFX from '../useSFX'
-import BottomNav from '../components/BottomNav'
-
 export default function HubPage() {
   const { 
     user, 
@@ -370,7 +368,6 @@ export default function HubPage() {
         )}
       </AnimatePresence>
 
-      <BottomNav active="hub" />
     </div>
   )
 }
