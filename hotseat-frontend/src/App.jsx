@@ -58,24 +58,26 @@ function App() {
 
   // ── Zero-lag mouse tracking via native DOM ──
   // CSS custom properties (--mx, --my) are written directly to the container
-  // element in a rAF loop — React never re-renders, so the spotlight and grid
-  // update instantly with zero frame of input lag.
+  // element. Latest position is always stored in a ref so the rAF callback
+  // reads the freshest value — no stale closure captures.
   const containerRef = useRef(null)
+  const posRef = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
 
     let raf = null
-    const onMove = (e) => {
-      if (!raf) {
-        raf = requestAnimationFrame(() => {
-          el.style.setProperty('--mx', `${e.clientX}px`)
-          el.style.setProperty('--my', `${e.clientY}px`)
-          raf = null
-        })
-      }
+    const tick = () => {
+      const p = posRef.current
+      el.style.setProperty('--mx', `${p.x}px`)
+      el.style.setProperty('--my', `${p.y}px`)
+      raf = requestAnimationFrame(tick)
     }
+    const onMove = (e) => {
+      posRef.current = { x: e.clientX, y: e.clientY }
+    }
+    raf = requestAnimationFrame(tick)
     window.addEventListener('mousemove', onMove, { passive: true })
     return () => {
       window.removeEventListener('mousemove', onMove)
@@ -114,7 +116,7 @@ function App() {
     <BrowserRouter>
       <main
         ref={containerRef}
-        className="relative min-h-screen w-full bg-[#08080c] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
+        className="relative min-h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
         style={{
           // Default CSS custom properties for spotlight/grid (updated via native mousemove)
           '--mx': '50%',

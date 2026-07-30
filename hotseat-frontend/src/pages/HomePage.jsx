@@ -191,7 +191,7 @@ export default function HomePage() {
 
       {/* Primary CTA */}
       {!todayAnswered ? (
-        <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/answer') }} className="w-full py-4 rounded-2xl bg-white text-zinc-950 font-semibold text-base shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:bg-zinc-200 transition-all duration-200 flex items-center justify-center gap-2">
+        <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/answer') }} className="w-full py-4 rounded-2xl bg-white/90 text-zinc-950 font-semibold text-base shadow-[0_0_20px_rgba(255,255,255,0.12)] hover:bg-white hover:shadow-[0_0_30px_rgba(255,255,255,0.18)] transition-all duration-200 flex items-center justify-center gap-2">
           {text.dropAnswer} <ChevronRight size={22} />
         </motion.button>
       ) : (

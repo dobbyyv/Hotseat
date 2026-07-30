@@ -1,13 +1,16 @@
 import { useEffect, useRef, useCallback } from 'react'
 
 // ── Configuration ──
-const ORB_COUNT = 12
-const MIN_RADIUS = 6
-const MAX_RADIUS = 10
-const MIN_SPEED = 0.3
-const MAX_SPEED = 1.2
-const GLOW_ALPHA = 0.12
-const CORE_ALPHA = 0.25
+const ORB_COUNT = 24
+const MIN_RADIUS = 4
+const MAX_RADIUS = 8
+const MIN_SPEED = 0.25
+const MAX_SPEED = 0.9
+const GLOW_ALPHA = 0.08
+const CORE_ALPHA = 0.18
+const DAMPING = 0.997           // per-frame velocity decay
+const WALL_DAMPING = 0.7        // energy retained after wall bounce
+const MAX_FLING = 6             // cap fling speed
 
 export default function OrbField() {
   const canvasRef = useRef(null)
@@ -102,15 +105,15 @@ export default function OrbField() {
       if (dragging && dragging.index === i) continue
       const o = orbs[i]
 
-      // Wall bounce
-      if (o.x - o.r <= 0) { o.x = o.r; o.vx = Math.abs(o.vx) }
-      if (o.x + o.r >= w) { o.x = w - o.r; o.vx = -Math.abs(o.vx) }
-      if (o.y - o.r <= 0) { o.y = o.r; o.vy = Math.abs(o.vy) }
-      if (o.y + o.r >= h) { o.y = h - o.r; o.vy = -Math.abs(o.vy) }
+      // Wall bounce with energy loss
+      if (o.x - o.r <= 0) { o.x = o.r; o.vx = Math.abs(o.vx) * WALL_DAMPING }
+      if (o.x + o.r >= w) { o.x = w - o.r; o.vx = -Math.abs(o.vx) * WALL_DAMPING }
+      if (o.y - o.r <= 0) { o.y = o.r; o.vy = Math.abs(o.vy) * WALL_DAMPING }
+      if (o.y + o.r >= h) { o.y = h - o.r; o.vy = -Math.abs(o.vy) * WALL_DAMPING }
 
-      // Damping — keep speeds sane
-      o.vx *= 0.9998
-      o.vy *= 0.9998
+      // Natural velocity decay — flings settle back to drift
+      o.vx *= DAMPING
+      o.vy *= DAMPING
       if (Math.abs(o.vx) < MIN_SPEED * 0.1) o.vx = (Math.random() - 0.5) * MIN_SPEED
       if (Math.abs(o.vy) < MIN_SPEED * 0.1) o.vy = (Math.random() - 0.5) * MIN_SPEED
 
