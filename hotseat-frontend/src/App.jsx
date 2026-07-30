@@ -129,59 +129,68 @@ function App() {
         </div>
 
         {/* ═══════════════════════════════════════════
-            LAYER 2 — Dense Technical Grid
-            Ultra-fine 12px blueprint grid revealed only
-            around the cursor via a tight 180px radial mask.
-            Crisp, high-tech engineering aesthetic.
+            LAYER 2 — Technical Grid
+            Balanced 36px blueprint grid revealed around
+            the cursor via a tight 180px radial mask.
+            Clean, readable technical layout.
             ═══════════════════════════════════════════ */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(249,250,251,0.03) 1px, transparent 1px), ' +
-              'linear-gradient(to bottom, rgba(249,250,251,0.03) 1px, transparent 1px)',
-            backgroundSize: '12px 12px',
-            // Tighter spotlight — 180px torch with gradual falloff
-            maskImage: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.05) 80%, transparent 100%)`,
-            WebkitMaskImage: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.05) 80%, transparent 100%)`,
+              'linear-gradient(to right, rgba(249,250,251,0.02) 1px, transparent 1px), ' +
+              'linear-gradient(to bottom, rgba(249,250,251,0.02) 1px, transparent 1px)',
+            backgroundSize: '36px 36px',
+            // Hardware-accelerated: CSS custom properties avoid React re-renders
+            '--x': `${mousePos.x}px`,
+            '--y': `${mousePos.y}px`,
+            maskImage: 'radial-gradient(180px circle at var(--x) var(--y), rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.05) 80%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(180px circle at var(--x) var(--y), rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.05) 80%, transparent 100%)',
           }}
         />
 
         {/* ═══════════════════════════════════════════
-            LAYER 3 — Tight Cursor Torch
+            LAYER 3 — Instant Cursor Torch
             A focused 180px pocket of warm light that
-            follows the cursor precisely — like a laser
-            beam, not a floodlight.
-            ═══════════════════════════════════════════ */}
-        <div
-          className="absolute inset-0 z-0 pointer-events-none transition-[background] duration-200 ease-out"
-          style={{
-            background: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.1), transparent 80%)`,
-          }}
-        />
-
-        {/* ═══════════════════════════════════════════
-            LAYER 4 — Subtle Idle Breathing Pulse
-            An imperceptible full-viewport overlay that
-            slowly oscillates between 0.5% and 1.5% white
-            every 6 seconds. You won't notice it unless
-            you stare — it just makes the page feel alive.
+            tracks the cursor with zero perceived delay.
+            No CSS transitions — driven by CSS custom
+            properties for GPU-composited instant updates.
             ═══════════════════════════════════════════ */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
-          style={{ animation: 'breath-pulse 6s ease-in-out infinite' }}
+          style={{
+            '--x': `${mousePos.x}px`,
+            '--y': `${mousePos.y}px`,
+            background: 'radial-gradient(180px circle at var(--x) var(--y), rgba(255,255,255,0.08), transparent 80%)',
+          }}
+        />
+
+        {/* ═══════════════════════════════════════════
+            LAYER 4 — Ultra-Slow Fluid Gradient Drift
+            A subtle 40s ambient gradient pan that creates
+            organic, imperceptible light shifts — like
+            clouds passing over the sun. Zero flicker,
+            purely hardware-accelerated background-position
+            animation on a composite layer.
+            ═══════════════════════════════════════════ */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(ellipse 80% 60% at 30% 20%, rgba(250,250,250,0.015) 0%, transparent 50%), radial-gradient(ellipse 60% 50% at 70% 80%, rgba(200,200,210,0.012) 0%, transparent 50%)',
+            backgroundSize: '200% 200%',
+            animation: 'ambient-drift 40s ease-in-out infinite alternate',
+          }}
         />
 
         {/* ═══════════════════════════════════════════
             LAYER 5 — Cinematic Film Grain (SVG Noise)
             Fixed overlay that eliminates digital color
             banding and gives the dark background physical
-            texture — like a 35mm print. Now breathes
-            subtly (opacity oscillates 0.02–0.04).
+            texture — like a 35mm print. Static opacity,
+            perfectly stable.
             ═══════════════════════════════════════════ */}
         <svg
-          className="fixed inset-0 z-50 mix-blend-overlay pointer-events-none"
-          style={{ animation: 'grain-breathe 8s ease-in-out infinite alternate' }}
+          className="fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay pointer-events-none"
           aria-hidden="true"
         >
           <filter id="noise">
