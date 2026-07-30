@@ -1,11 +1,11 @@
 import { useEffect, useRef, useCallback } from 'react'
 
 // ── Configuration ──
-const ORB_COUNT = 24
-const MIN_RADIUS = 4
-const MAX_RADIUS = 8
-const MIN_SPEED = 0.25
-const MAX_SPEED = 0.9
+const ORB_COUNT = 48
+const MIN_RADIUS = 3
+const MAX_RADIUS = 6
+const MIN_SPEED = 0.50
+const MAX_SPEED = 1.6
 const GLOW_ALPHA = 0.08
 const CORE_ALPHA = 0.18
 const DAMPING = 0.997           // per-frame velocity decay
