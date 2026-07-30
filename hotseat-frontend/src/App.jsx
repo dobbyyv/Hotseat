@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
 
@@ -22,6 +22,12 @@ function App() {
   
   const hasIdentity = !!user;
   const isFullyAuthenticated = hasIdentity && !!activeGroup;
+
+  // 🖱️ Mouse tracking for spotlight effect
+  const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  const handleMouseMove = useCallback((e) => {
+    setMouse({ x: e.clientX, y: e.clientY })
+  }, [])
 
   // Global WebSocket connection for real-time group updates
   useEffect(() => {
@@ -52,7 +58,16 @@ function App() {
 
   return (
     <BrowserRouter>
-      <main className="relative min-h-screen w-full bg-[#09090b] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white">
+      <main
+        onMouseMove={handleMouseMove}
+        className="relative min-h-screen w-full bg-[#09090b] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
+      >
+        {/* Depth orbs behind grid */}
+        <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+          <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-zinc-700/10 rounded-full blur-[128px] pointer-events-none -z-10" />
+          <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-slate-500/10 rounded-full blur-[128px] pointer-events-none -z-10" />
+        </div>
+
         {/* High-tech fading grid background */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
@@ -62,6 +77,14 @@ function App() {
             backgroundSize: '14px 24px',
             maskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
             WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
+          }}
+        />
+
+        {/* Mouse-tracking spotlight overlay */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{
+            background: `radial-gradient(600px circle at ${mouse.x}px ${mouse.y}px, rgba(255,255,255,0.06), transparent 80%)`,
           }}
         />
 

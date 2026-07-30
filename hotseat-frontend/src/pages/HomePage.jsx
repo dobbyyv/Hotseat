@@ -124,7 +124,7 @@ export default function HomePage() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_rgba(0,0,0,0.5)] hover:border-white/20 transition-all duration-300 relative overflow-hidden mb-6"
+        className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_-12px_rgba(255,255,255,0.12)] hover:border-white/30 transition-all duration-300 relative overflow-hidden mb-6"
       >
         <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         <div className="flex items-center justify-between mb-6 relative z-10">
@@ -133,8 +133,8 @@ export default function HomePage() {
           </span>
           {answeredCount > 0 && (
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-emerald-400 font-mono text-xs tracking-wider font-bold">{answeredCount} IN</span>
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium">{answeredCount} IN</span>
             </motion.div>
           )}
         </div>
@@ -147,8 +147,10 @@ export default function HomePage() {
               const isMe = m.id === user.id
               const hasAnswered = todayAnswered && answeredUserIds.has(m.id)
               return (
-                <div key={m.id} className={`w-10 h-10 rounded-full border-2 border-zinc-800 flex items-center justify-center text-sm font-mono font-medium overflow-hidden transition-all duration-300 relative ${isMe ? 'bg-white text-black z-10 ring-2 ring-white/20' : hasAnswered ? 'bg-emerald-600 text-white' : 'bg-zinc-800 border-white/20 text-zinc-400'}`} title={m.name}>
-                  {m.avatar_url ? <img src={`${SERVER_URL}${m.avatar_url}`} alt="pfp" className="w-full h-full object-cover" /> : m.avatar_text}
+                <div key={m.id} className={`w-10 h-10 rounded-full overflow-hidden transition-all duration-300 relative ${isMe ? 'p-[1px] bg-gradient-to-b from-white/30 to-white/5 z-10' : hasAnswered ? 'bg-emerald-600 text-white' : 'bg-zinc-800 border-2 border-white/20 text-zinc-400'}`} title={m.name}>
+                  <div className={`w-full h-full rounded-full flex items-center justify-center text-sm font-mono font-medium ${isMe ? 'bg-zinc-900' : ''}`}>
+                  {m.avatar_url ? <img src={`${SERVER_URL}${m.avatar_url}`} alt="pfp" className="w-full h-full object-cover rounded-full" /> : m.avatar_text}
+                  </div>
                   {todayAnswered && hasAnswered && !isMe && <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full flex items-center justify-center"><Check size={8} className="text-black" strokeWidth={4} /></span>}
                 </div>
               )
@@ -163,11 +165,11 @@ export default function HomePage() {
 
       {/* Primary CTA */}
       {!todayAnswered ? (
-        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { playSFX('woosh'); navigate('/answer') }} className="w-full py-4 rounded-2xl bg-white text-black font-semibold text-lg hover:bg-zinc-200 transition-all duration-200 shadow-[0_0_30px_rgba(255,255,255,0.1)] flex items-center justify-center gap-2">
+        <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/answer') }} className="w-full py-4 rounded-2xl bg-white text-zinc-950 font-semibold text-base shadow-[0_0_25px_rgba(255,255,255,0.2)] hover:bg-zinc-200 transition-all duration-200 flex items-center justify-center gap-2">
           {text.dropAnswer} <ChevronRight size={22} />
         </motion.button>
       ) : (
-        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} onClick={() => { playSFX('woosh'); navigate('/results') }} className="w-full py-4 rounded-2xl bg-zinc-800/80 border border-white/10 text-zinc-200 font-semibold text-lg hover:bg-zinc-700/80 hover:border-white/20 transition-all duration-200 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2">
+        <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/results') }} className="w-full py-4 rounded-2xl bg-zinc-800/80 border border-white/10 text-zinc-200 font-semibold text-base hover:bg-zinc-700/80 hover:border-white/20 transition-all duration-200 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2">
           {text.seeOthers} <ChevronRight size={22} className="text-zinc-400" />
         </motion.button>
       )}
