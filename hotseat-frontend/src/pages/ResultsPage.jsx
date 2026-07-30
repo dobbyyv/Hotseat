@@ -8,15 +8,15 @@ import { t } from '../translations'
 import { subscribeToPushNotifications } from '../pushUtility'
 import useSFX from '../useSFX'
 
-const SERVER_URL  = import.meta.env.VITE_SERVER_URL
+const SERVER_URL = import.meta.env.VITE_SERVER_URL
 const GIPHY_KEY = import.meta.env.VITE_GIPHY_KEY || ''
 
-const BAR_COLORS = [
-  'from-white/20 to-zinc-400/20',
-  'from-zinc-400/20 to-zinc-500/20',
-  'from-zinc-500/20 to-zinc-600/20',
-  'from-white/10 to-zinc-400/10',
-  'from-zinc-300/20 to-zinc-500/20',
+const REACTIONS = [
+  { emoji: '🔥', label: 'fire' },
+  { emoji: '💀', label: 'skull' },
+  { emoji: '👑', label: 'crown' },
+  { emoji: '🎯', label: 'bullseye' },
+  { emoji: '💜', label: 'heart' },
 ]
 
 function VoteBreakdown({ answers, groupMembers, serverUrl, revealed }) {
@@ -29,34 +29,38 @@ function VoteBreakdown({ answers, groupMembers, serverUrl, revealed }) {
       if (!map[key]) map[key] = []
       map[key].push(ans)
     })
-    return Object.entries(map).map(([name, voters]) => ({
-      name, voters, count: voters.length,
-      pct: total > 0 ? Math.round((voters.length / total) * 100) : 0,
-      member: groupMembers?.find(m => m.name === name) ?? null,
-    })).sort((a, b) => b.count - a.count)
+    return Object.entries(map)
+      .map(([name, voters]) => ({
+        name, voters, count: voters.length,
+        pct: total > 0 ? Math.round((voters.length / total) * 100) : 0,
+        member: groupMembers?.find(m => m.name === name) ?? null,
+      }))
+      .sort((a, b) => b.count - a.count)
   }, [answers, total, groupMembers])
 
-  if (ranked.length === 0) return <p className="text-zinc-600 text-sm text-center py-6">No votes yet.</p>
+  if (ranked.length === 0) return <p className="text-zinc-500 text-sm text-center py-6">No votes yet.</p>
 
   return (
-    <div className="space-y-5 px-5 py-4">
+    <div className="space-y-5">
       {ranked.map((entry, i) => (
         <motion.div key={entry.name} initial={{ opacity: 0, y: 12 }} animate={revealed ? { opacity: 1, y: 0 } : {}} transition={{ delay: i * 0.1, duration: 0.4 }}>
           <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-full border border-white/10 bg-zinc-800 overflow-hidden flex items-center justify-center text-xs font-bold flex-shrink-0">
-                {entry.member?.avatar_url ? <img src={`${serverUrl}${entry.member.avatar_url}`} className="w-full h-full object-cover" alt="" /> : <span className="text-zinc-300">{entry.name.substring(0, 2).toUpperCase()}</span>}
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full border-2 flex items-center justify-center text-sm font-bold flex-shrink-0 overflow-hidden ${i === 0 ? 'border-amber-400/60 p-[1px] bg-gradient-to-b from-amber-400/30 to-transparent' : 'border-white/10 bg-zinc-800'}`}>
+                <div className="w-full h-full rounded-full flex items-center justify-center bg-zinc-800">
+                  {entry.member?.avatar_url ? <img src={`${serverUrl}${entry.member.avatar_url}`} className="w-full h-full object-cover rounded-full" alt="" /> : <span className="text-zinc-300">{entry.name.substring(0, 2).toUpperCase()}</span>}
+                </div>
               </div>
               {i === 0 && <span className="text-base leading-none">👑</span>}
               <span className="text-white font-bold text-sm tracking-tight">{entry.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-sm font-black text-zinc-300">{entry.pct}%</span>
+              <span className="font-mono text-sm text-zinc-300 font-bold">{entry.pct}%</span>
               <span className="text-zinc-600 text-xs">{entry.count} vote{entry.count !== 1 ? 's' : ''}</span>
             </div>
           </div>
-          <div className="h-2.5 bg-zinc-800 rounded-full overflow-hidden border border-white/5 mb-2.5">
-            <motion.div initial={{ width: 0 }} animate={revealed ? { width: `${entry.pct}%` } : { width: 0 }} transition={{ delay: i * 0.1 + 0.15, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }} className={`h-full rounded-full bg-gradient-to-r ${BAR_COLORS[i % BAR_COLORS.length]}`} />
+          <div className="w-full h-3 bg-zinc-800/80 rounded-full overflow-hidden p-[2px] border border-white/5 mb-2.5">
+            <motion.div initial={{ width: 0 }} animate={revealed ? { width: `${entry.pct}%` } : { width: 0 }} transition={{ delay: i * 0.1 + 0.15, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }} className="bg-gradient-to-r from-zinc-100 to-zinc-400 rounded-full h-full" />
           </div>
           <div className="flex items-center gap-2 pl-0.5">
             <div className="flex -space-x-1.5">
@@ -78,8 +82,8 @@ function VoteBreakdown({ answers, groupMembers, serverUrl, revealed }) {
 function AnswerCard({ ans, index, isMe, revealed, serverUrl }) {
   return (
     <motion.div initial={{ opacity: 0, x: -14 }} animate={revealed ? { opacity: 1, x: 0 } : {}} transition={{ delay: index * 0.1 }}
-      className={`bg-zinc-900/60 backdrop-blur-xl border rounded-2xl p-4 flex gap-3 ${isMe ? 'border-white/20' : 'border-white/8'}`}>
-      <div className={`w-10 h-10 rounded-full border border-zinc-800 flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden ${isMe ? 'bg-white text-black' : 'bg-zinc-800 text-zinc-300'}`}>
+      className={`bg-zinc-800/60 backdrop-blur-xl border rounded-2xl p-4 flex gap-3 ${isMe ? 'border-white/20' : 'border-white/8'}`}>
+      <div className={`w-10 h-10 rounded-full border border-zinc-700 flex items-center justify-center font-bold text-xs flex-shrink-0 overflow-hidden ${isMe ? 'bg-white text-black' : 'bg-zinc-700 text-zinc-300'}`}>
         {ans.avatar_url ? <img src={`${serverUrl}${ans.avatar_url}`} className="w-full h-full object-cover" alt="pfp" /> : ans.avatar_text}
       </div>
       <div className="min-w-0 flex-1">
@@ -92,19 +96,24 @@ function AnswerCard({ ans, index, isMe, revealed, serverUrl }) {
 
 function ChatBubble({ msg, isMe, serverUrl }) {
   return (
-    <div className={`flex gap-2.5 ${isMe ? 'flex-row-reverse' : ''}`}>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95, y: 10 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      transition={{ type: "spring", stiffness: 400, damping: 25 }}
+      className={`flex gap-2.5 ${isMe ? 'flex-row-reverse' : ''}`}
+    >
       <div className="w-8 h-8 rounded-full border border-zinc-800 bg-zinc-700 flex items-center justify-center text-zinc-300 font-bold text-xs flex-shrink-0 overflow-hidden">
         {msg.avatar_url ? <img src={`${serverUrl}${msg.avatar_url}`} className="w-full h-full object-cover" alt="pfp" /> : msg.avatar_text}
       </div>
-      <div className={`max-w-[72%] flex flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
+      <div className={`max-w-[80%] flex flex-col gap-1 ${isMe ? 'items-end' : 'items-start'}`}>
         {!isMe && <span className="text-zinc-500 text-[10px] px-1 font-bold uppercase tracking-wider">{msg.name}</span>}
-        <div className={`text-sm font-medium break-words ${msg.type === 'text' ? isMe ? 'bg-white text-black px-4 py-2.5 rounded-2xl rounded-tr-sm' : 'bg-zinc-800/80 border border-white/8 text-white px-4 py-2.5 rounded-2xl rounded-tl-sm backdrop-blur-md' : ''}`}>
+        <div className={`text-sm font-medium break-words ${msg.type === 'text' ? isMe ? 'bg-white text-black px-4 py-2.5 rounded-2xl rounded-tr-sm' : 'bg-zinc-800/60 border border-white/10 text-zinc-200 px-4 py-2.5 rounded-2xl rounded-tl-sm backdrop-blur-md' : ''}`}>
           {msg.type === 'text' && msg.text}
           {msg.type === 'image' && <img src={`${serverUrl}${msg.media_url}`} alt="upload" className="rounded-xl max-w-full border border-white/10" />}
           {msg.type === 'gif' && <img src={msg.media_url} alt="gif" className="rounded-xl max-w-full border border-white/10" />}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -133,8 +142,10 @@ export default function ResultsPage() {
   const [isSearchingGifs, setIsSearchingGifs] = useState(false)
   const gifDebounceRef = useRef(null)
 
-  useEffect(() => { playSFX('woosh') }, [playSFX])
+  // Auto-scroll to bottom
+  useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
 
+  useEffect(() => { playSFX('woosh') }, [playSFX])
   useEffect(() => { if (!question) fetchTodayQuestion() }, [question, fetchTodayQuestion])
   useEffect(() => { if (todayAnswered && question) { fetchGroupAnswers(); setTimeout(() => setRevealed(true), 400) } }, [todayAnswered, question, fetchGroupAnswers])
   useEffect(() => { if (!group?.id) return; fetch(`${SERVER_URL}/api/chat/${group.id}`).then(r => r.json()).then(data => Array.isArray(data) && setMessages(data)).catch(console.error) }, [group?.id])
@@ -143,7 +154,7 @@ export default function ResultsPage() {
     if (!group || !user) return
     const sock = io(SERVER_URL); socketRef.current = sock
     sock.emit('join_room', { groupId: group.id, userId: user.id })
-    sock.on('receive_message', msg => setMessages(prev => [...prev, msg]))
+    sock.on('receive_message', msg => { setMessages(prev => [...prev, msg]) })
     sock.on('user_typing', data => { if (data.user_id === user.id) return; setTypingUsers(prev => prev.find(u => u.user_id === data.user_id) ? prev : [...prev, data]) })
     sock.on('user_stopped_typing', data => setTypingUsers(prev => prev.filter(u => u.user_id !== data.user_id)))
     sock.on('answer_submitted', () => fetchGroupAnswers())
@@ -164,6 +175,7 @@ export default function ResultsPage() {
   }
 
   const handleSendText = () => { if (!messageInput.trim()) return; playSFX('thock'); emitMessage('text', messageInput.trim()); setMessageInput(''); socketRef.current?.emit('typing_end', { group_id: group.id, user_id: user.id }) }
+  const handleSendReaction = (emoji) => { playSFX('thock'); emitMessage('text', emoji) }
 
   const handleImageUpload = async e => {
     const file = e.target.files?.[0]; if (!file) return
@@ -182,7 +194,6 @@ export default function ResultsPage() {
   }
 
   const handleSendGif = url => { playSFX('thock'); emitMessage('gif', url); setShowGifPicker(false); setGifQuery(''); setGifs([]) }
-
   const isTagQuestion = question?.type === 'tag' || question?.ui_type === 'tag'
 
   if (!question || !user) return (
@@ -206,66 +217,99 @@ export default function ResultsPage() {
   )
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[#09090b] text-white font-sans overflow-hidden">
+    <div className="w-full max-w-4xl mx-auto space-y-6 pb-24 min-h-screen flex flex-col">
       {/* Header */}
-      <div className="relative z-10 shrink-0 pt-14 pb-4 px-5 bg-zinc-900/40 border-b border-white/5 backdrop-blur-md">
-        <div className="flex justify-between items-center mb-1.5">
-          <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Results</p>
-          <div className="flex items-center gap-2">
-            <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/10">{group?.name}</span>
-            <button onClick={() => { playSFX('success'); subscribeToPushNotifications(user.id, SERVER_URL) }} className="bg-zinc-800/80 text-white border border-white/10 px-2.5 py-1.5 rounded-xl text-[10px] font-bold active:scale-95 transition-all hover:bg-zinc-700/80">🔔</button>
-          </div>
+      <div className="flex justify-between items-center pt-8">
+        <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Results</p>
+        <div className="flex items-center gap-2">
+          <span className="text-zinc-400 text-[10px] font-bold uppercase tracking-widest bg-white/5 px-2 py-1 rounded-md border border-white/10">{group?.name}</span>
+          <button onClick={() => { playSFX('success'); subscribeToPushNotifications(user.id, SERVER_URL) }} className="bg-zinc-800/80 text-white border border-white/10 px-2.5 py-1.5 rounded-xl text-[10px] font-bold active:scale-95 transition-all hover:bg-zinc-700/80">🔔</button>
         </div>
-        <p className="text-white font-bold font-display text-base leading-snug line-clamp-2">{question[`text_${lang}`] ?? question.text}</p>
       </div>
 
-      {/* Answers Panel */}
-      <div className="relative z-10 shrink-0 border-b border-white/8">
-        <button onClick={() => setAnswersCollapsed(c => !c)} className="w-full flex items-center justify-between px-5 py-2.5 bg-zinc-900/40 hover:bg-zinc-800/60 transition-colors">
+      {/* Vote Breakdown Bento Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
+        className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden"
+      >
+        <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <p className="text-xl md:text-2xl font-semibold tracking-tight text-zinc-100 mb-6 leading-snug">
+          {question[`text_${lang}`] ?? question.text}
+        </p>
+        <button onClick={() => setAnswersCollapsed(c => !c)} className="w-full flex items-center justify-between py-2 text-zinc-500 hover:text-zinc-300 transition-colors mb-2">
+          <span className="text-white text-[11px] font-bold uppercase tracking-widest">{isTagQuestion ? 'Vote Breakdown' : 'Answers'}</span>
           <div className="flex items-center gap-2">
-            <span className="text-white text-[11px] font-bold uppercase tracking-widest">{isTagQuestion ? 'Vote Breakdown' : 'Answers'}</span>
             {!isFetchingAnswers && groupAnswers.length > 0 && <span className="bg-white/10 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/10">{groupAnswers.length}</span>}
+            {answersCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
           </div>
-          {answersCollapsed ? <ChevronDown size={14} className="text-zinc-500" /> : <ChevronUp size={14} className="text-zinc-500" />}
         </button>
         <motion.div animate={{ height: answersCollapsed ? 0 : 'auto' }} transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ overflow: 'hidden' }}>
-          <div className="max-h-[36vh] overflow-y-auto overscroll-contain">
+          <div className="pt-2">
             {isFetchingAnswers ? <div className="flex justify-center py-8"><Loader2 size={22} className="text-zinc-400 animate-spin" /></div>
             : groupAnswers.length === 0 ? <p className="text-zinc-600 text-sm text-center py-8">No answers yet — be the first!</p>
             : isTagQuestion ? <VoteBreakdown answers={groupAnswers} groupMembers={group?.members} serverUrl={SERVER_URL} revealed={revealed} />
-            : <div className="px-5 py-3 space-y-3">{groupAnswers.map((ans, i) => <AnswerCard key={ans.user_id} ans={ans} index={i} isMe={ans.user_id === user.id} revealed={revealed} serverUrl={SERVER_URL} />)}</div>}
+            : <div className="space-y-3">{groupAnswers.map((ans, i) => <AnswerCard key={ans.user_id} ans={ans} index={i} isMe={ans.user_id === user.id} revealed={revealed} serverUrl={SERVER_URL} />)}</div>}
           </div>
         </motion.div>
-      </div>
+      </motion.div>
 
-      {/* Chat label */}
-      <div className="relative z-10 shrink-0 flex items-center gap-3 px-5 py-2">
-        <div className="h-px flex-1 bg-white/10" />
-        <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">{text.liveChat ?? 'Live Chat'}</span>
-        <div className="h-px flex-1 bg-white/10" />
-      </div>
-
-      {/* Chat messages */}
-      <div ref={chatScrollRef} className="relative z-10 flex-1 min-h-0 overflow-y-auto overscroll-contain px-5 py-2 space-y-3">
-        {messages.length === 0 && <p className="text-zinc-700 text-xs text-center pt-4">No messages yet. Start the chaos ↓</p>}
-        {messages.map(msg => <ChatBubble key={msg.id} msg={msg} isMe={msg.user_id === user.id} serverUrl={SERVER_URL} />)}
-        <AnimatePresence>
-          {typingUsers.length > 0 && (
-            <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="flex items-center gap-2">
-              <div className="flex gap-1 bg-zinc-800/80 px-3 py-2 rounded-full border border-white/5">
-                {[0, 0.2, 0.4].map((delay, i) => <motion.div key={i} animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay }} className="w-1.5 h-1.5 bg-zinc-400 rounded-full" />)}
-              </div>
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{typingUsers[0].name} is typing…</span>
-            </motion.div>
+      {/* Live Chat Glass Card */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25, delay: 0.05 }}
+        className="bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 min-h-[350px] flex flex-col justify-between"
+      >
+        <div className="flex items-center gap-3 mb-4">
+          <div className="h-px flex-1 bg-white/10" />
+          <span className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">{text.liveChat ?? 'Live Chat'}</span>
+          <div className="h-px flex-1 bg-white/10" />
+        </div>
+        <div ref={chatScrollRef} className="flex-1 min-h-[200px] overflow-y-auto overscroll-contain space-y-3 mb-4">
+          {messages.length === 0 && (
+            <div className="flex items-center justify-center h-full">
+              <span className="font-mono text-xs text-zinc-500 bg-zinc-950/50 border border-white/5 px-4 py-2 rounded-full mx-auto animate-pulse">
+                No messages yet. Start the chaos ↓
+              </span>
+            </div>
           )}
-        </AnimatePresence>
-        <div ref={chatEndRef} className="h-1" />
+          {messages.map(msg => <ChatBubble key={msg.id} msg={msg} isMe={msg.user_id === user.id} serverUrl={SERVER_URL} />)}
+          <AnimatePresence>
+            {typingUsers.length > 0 && (
+              <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }} className="flex items-center gap-2">
+                <div className="flex gap-1 bg-zinc-800/80 px-3 py-2 rounded-full border border-white/5">
+                  {[0, 0.2, 0.4].map((delay, i) => <motion.div key={i} animate={{ y: [0, -3, 0] }} transition={{ repeat: Infinity, duration: 0.6, delay }} className="w-1.5 h-1.5 bg-zinc-400 rounded-full" />)}
+                </div>
+                <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-widest">{typingUsers[0].name} is typing…</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <div ref={chatEndRef} />
+        </div>
+      </motion.div>
+
+      {/* Floating Quick Reactions */}
+      <div className="flex items-center justify-center gap-2 flex-wrap">
+        {REACTIONS.map(r => (
+          <motion.button
+            key={r.label}
+            whileHover={{ y: -3, scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={() => handleSendReaction(r.emoji)}
+            className="bg-zinc-900/80 border border-white/10 hover:border-white/30 text-xs px-3 py-1.5 rounded-full backdrop-blur-md cursor-pointer transition-all"
+          >
+            {r.emoji}
+          </motion.button>
+        ))}
       </div>
 
       {/* GIF Picker */}
       <AnimatePresence>
         {showGifPicker && (
-          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: 0.2 }} className="relative z-10 shrink-0 mx-4 mb-2 bg-zinc-950/95 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
+          <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: 0.2 }}
+            className="bg-zinc-950/95 backdrop-blur-xl border border-white/10 rounded-3xl p-4 shadow-[0_0_40px_rgba(0,0,0,0.8)]">
             <div className="flex items-center gap-2 mb-3">
               <input value={gifQuery} onChange={e => handleGifQueryChange(e.target.value)} placeholder={text.searchGifs ?? 'Search GIFs…'} autoFocus className="flex-1 bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-2.5 text-sm text-white font-bold outline-none focus:border-white/30 transition-colors" />
               <button onClick={() => { setShowGifPicker(false); setGifQuery(''); setGifs([]) }} className="w-9 h-9 flex items-center justify-center rounded-full bg-zinc-800/80 border border-white/10 text-zinc-400 hover:text-white transition-all"><X size={16} /></button>
@@ -279,18 +323,33 @@ export default function ResultsPage() {
         )}
       </AnimatePresence>
 
-      {/* Input bar */}
-      <div className="relative z-10 shrink-0 flex gap-2 items-end px-4 pt-2 pb-2">
+      {/* Floating Input Pill */}
+      <div className="relative flex items-center bg-zinc-900/90 border border-white/10 focus-within:border-white/30 rounded-full p-2 pl-5 shadow-2xl transition-all">
         <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
-        <div className="flex-1 bg-zinc-900/90 backdrop-blur-xl border border-white/10 rounded-3xl flex items-center px-2 py-1 focus-within:border-white/30 transition-colors">
-          <button onClick={() => { playSFX('click'); fileInputRef.current?.click() }} disabled={isUploading} className="p-2.5 text-zinc-400 hover:text-white transition-colors">{isUploading ? <Loader2 size={19} className="animate-spin" /> : <ImageIcon size={19} />}</button>
-          <button onClick={() => { playSFX('click'); setShowGifPicker(p => !p) }} className={`p-2.5 transition-colors ${showGifPicker ? 'text-white' : 'text-zinc-400 hover:text-white'}`}><Smile size={19} /></button>
-          <textarea value={messageInput} onChange={handleTyping} onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendText() } }} placeholder={text.typeMessage ?? 'Say something…'} rows="1" spellCheck="false" className="flex-1 bg-transparent px-2 py-3.5 text-white font-bold placeholder:text-zinc-600 outline-none text-sm resize-none overflow-hidden h-[46px] block" />
-        </div>
-        <button onClick={handleSendText} className="w-[52px] h-[52px] bg-white hover:bg-zinc-200 rounded-full flex items-center justify-center transition-all active:scale-90 flex-shrink-0"><Send size={19} className="text-black relative right-px" /></button>
+        <button onClick={() => { playSFX('click'); fileInputRef.current?.click() }} disabled={isUploading} className="p-1.5 text-zinc-400 hover:text-white transition-colors shrink-0">
+          {isUploading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+        </button>
+        <button onClick={() => { playSFX('click'); setShowGifPicker(p => !p) }} className={`p-1.5 transition-colors shrink-0 ${showGifPicker ? 'text-white' : 'text-zinc-400 hover:text-white'}`}>
+          <Smile size={18} />
+        </button>
+        <textarea
+          value={messageInput}
+          onChange={handleTyping}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendText() } }}
+          placeholder={text.typeMessage ?? 'Say something…'}
+          rows="1"
+          spellCheck="false"
+          className="w-full bg-transparent text-zinc-100 placeholder-zinc-500 text-sm focus:outline-none resize-none py-2 px-2 overflow-hidden h-[42px] block"
+        />
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.92 }}
+          onClick={handleSendText}
+          className="w-10 h-10 rounded-full bg-white text-zinc-950 flex items-center justify-center shrink-0 shadow-md"
+        >
+          <Send size={16} className="relative right-px" />
+        </motion.button>
       </div>
-
-      <div className="shrink-0 h-24" />
     </div>
   )
 }
