@@ -295,7 +295,7 @@ export default function ResultsPage() {
         </div>
         <div
           ref={chatScrollRef}
-          className="flex-1 min-h-0 overflow-y-auto space-y-3 mb-3 chat-scrollbar"
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden space-y-3 mb-3 chat-scrollbar"
         >
           {messages.length === 0 && (
             <div className="flex items-center justify-center h-full min-h-[120px]">
