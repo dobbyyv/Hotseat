@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
@@ -13,10 +13,21 @@ import AnimatedNumber from '../components/AnimatedNumber'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL
 
+// Moved outside HomePage so it's not re-created on every parent re-render,
+// preventing unmount/remount cycles on AnimatedNumber's useMotionValue hooks.
 function CountdownTimer({ lang }) {
-  const [hours, setHours] = useState(0)
-  const [minutes, setMinutes] = useState(0)
-  const [seconds, setSeconds] = useState(0)
+  const [time, setTime] = useState(() => {
+    const now = new Date()
+    const next = new Date()
+    next.setHours(9, 0, 0, 0)
+    if (now.getHours() >= 9) next.setDate(next.getDate() + 1)
+    const diff = next - now
+    return {
+      hours: Math.max(0, Math.floor((diff / 3600000) % 24)),
+      minutes: Math.max(0, Math.floor((diff / 60000) % 60)),
+      seconds: Math.max(0, Math.floor((diff / 1000) % 60)),
+    }
+  })
 
   useEffect(() => {
     const calc = () => {
@@ -25,25 +36,30 @@ function CountdownTimer({ lang }) {
       next.setHours(9, 0, 0, 0)
       if (now.getHours() >= 9) next.setDate(next.getDate() + 1)
       const diff = next - now
-      setHours(Math.max(0, Math.floor((diff / 3600000) % 24)))
-      setMinutes(Math.max(0, Math.floor((diff / 60000) % 60)))
-      setSeconds(Math.max(0, Math.floor((diff / 1000) % 60)))
+      setTime({
+        hours: Math.max(0, Math.floor((diff / 3600000) % 24)),
+        minutes: Math.max(0, Math.floor((diff / 60000) % 60)),
+        seconds: Math.max(0, Math.floor((diff / 1000) % 60)),
+      })
     }
-    calc()
     const timer = setInterval(calc, 1000)
     return () => clearInterval(timer)
   }, [])
 
-  return (
+  // Memoize the three AnimatedNumber instances so their keys stay stable
+  // across re-renders triggered by the interval.
+  const timerDisplay = useMemo(() => (
     <span className="text-xs font-mono font-bold tracking-widest uppercase text-zinc-500">
       {lang === 'en' ? 'New question in' : 'Nuova domanda tra'}{' '}
-      <AnimatedNumber value={hours} className="text-zinc-200" />
+      <AnimatedNumber value={time.hours} className="text-zinc-200" />
       <span className="text-zinc-500 mx-0.5">:</span>
-      <AnimatedNumber value={minutes} className="text-zinc-200" />
+      <AnimatedNumber value={time.minutes} className="text-zinc-200" />
       <span className="text-zinc-500 mx-0.5">:</span>
-      <AnimatedNumber value={seconds} className="text-zinc-200" />
+      <AnimatedNumber value={time.seconds} className="text-zinc-200" />
     </span>
-  )
+  ), [time.hours, time.minutes, time.seconds, lang])
+
+  return timerDisplay
 }
 
 export default function HomePage() {
