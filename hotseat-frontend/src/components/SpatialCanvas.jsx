@@ -1,14 +1,17 @@
 import { useMemo, useRef } from 'react'
-import { Canvas } from '@react-three/fiber'
-import { Float, Html, Environment, RoundedBox } from '@react-three/drei'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
 /**
- * Particles — 25 slowly rotating spheres scattered in the void
- * to provide parallax reference and deep spatial depth.
+ * Particles — 25 spheres scattered in the void for parallax depth cues.
+ * The entire group pans opposite to the mouse, creating perceived depth
+ * behind the fixed 2D glass container.
  */
-function Particles() {
-  const meshRef = useRef(null)
+function Particles({ mousePos }) {
+  const groupRef = useRef(null)
+  const targetRotX = useRef(0)
+  const targetRotY = useRef(0)
 
   // Precompute random positions once
   const particles = useMemo(() => {
@@ -16,14 +19,28 @@ function Particles() {
       position: [
         (Math.random() - 0.5) * 16,
         (Math.random() - 0.5) * 14,
-        -5 - Math.random() * 10,   // Z between -5 and -15
+        -5 - Math.random() * 10, // Z between -5 and -15
       ],
       scale: 0.02 + Math.random() * 0.04,
     }))
   }, [])
 
+  // Smooth mouse-driven parallax — pan opposite to mouse direction
+  useFrame(() => {
+    if (!groupRef.current) return
+    // Target: pan the particle field slightly opposite to mouse (inverted for depth illusion)
+    targetRotY.current = -mousePos.x * 0.25
+    targetRotX.current = -mousePos.y * 0.15
+
+    const damping = 0.04
+    groupRef.current.rotation.y +=
+      (targetRotY.current - groupRef.current.rotation.y) * damping
+    groupRef.current.rotation.x +=
+      (targetRotX.current - groupRef.current.rotation.x) * damping
+  })
+
   return (
-    <group ref={meshRef} rotation={[0, 0, 0]}>
+    <group ref={groupRef}>
       {particles.map((p, i) => (
         <mesh key={i} position={p.position} scale={p.scale}>
           <sphereGeometry args={[1, 8, 8]} />
@@ -43,58 +60,10 @@ function Particles() {
 }
 
 /**
- * GlassIsland — a physical 3D slab of dark frosted glass floating in space.
- * The UI is anchored directly to its surface via Drei's Html component.
- * Float creates organic, weightless hover movement.
+ * SpatialScene — camera, HDRI environment, lights, and particle void.
+ * No Html, no glass mesh — purely a spatial background layer.
  */
-function GlassIsland({ children }) {
-  return (
-    <Float
-      speed={2}
-      rotationIntensity={0.15}
-      floatIntensity={0.4}
-      floatingRange={[0, 0.2]}
-    >
-      {/* 3D glass mesh */}
-      <RoundedBox args={[3, 5.2, 0.1]} radius={0.12} smoothness={4}>
-        <meshPhysicalMaterial
-          transmission={1}
-          roughness={0.15}
-          thickness={0.5}
-          clearcoat={1}
-          clearcoatRoughness={0.08}
-          ior={1.5}
-          color="#101015"
-          specularIntensity={1}
-          specularColor="#ffffff"
-          envMapIntensity={1.2}
-          metalness={0.05}
-        />
-      </RoundedBox>
-
-      {/* UI anchored to the front face of the glass slab */}
-      <Html
-        transform
-        position={[0, 0, 0.06]}
-        distanceFactor={3}
-        occlude={false}
-        style={{ pointerEvents: 'auto', userSelect: 'auto' }}
-      >
-        <div
-          className="w-[320px] sm:w-[380px] p-6 rounded-2xl"
-          style={{ background: 'transparent' }}
-        >
-          {children}
-        </div>
-      </Html>
-    </Float>
-  )
-}
-
-/**
- * SpatialScene — camera + HDRI environment + particle void + glass island.
- */
-function SpatialScene({ children }) {
+function SpatialScene({ mousePos }) {
   return (
     <>
       {/* Perspective Camera */}
@@ -104,56 +73,47 @@ function SpatialScene({ children }) {
         makeDefault
       />
 
-      {/* HDRI environment for realistic glass reflections */}
+      {/* Self-hosted HDRI environment for subtle reflections */}
       <Environment files="/hdri/night.hdr" />
 
       {/* Ambient fill light */}
       <ambientLight intensity={0.3} />
 
-      {/* Subtle directional accent */}
+      {/* Directional accent */}
       <directionalLight
         position={[-3, 4, 5]}
         intensity={0.6}
         color="#c4b5fd"
       />
 
-      {/* Background particle field for depth parallax */}
-      <Particles />
-
-      {/* The glass island with the UI */}
-      <GlassIsland>
-        {children}
-      </GlassIsland>
+      {/* Particle field — responds to mouse for depth parallax */}
+      <Particles mousePos={mousePos} />
     </>
   )
 }
 
 /**
- * SpatialCanvas — WebGL-first spatial experience.
- * Renders a 3D glass slab floating in a deep particle void with HDRI lighting.
- * Route content is anchored to the glass surface via Drei's Html.
+ * SpatialCanvas — WebGL background layer only.
+ * Renders a deep-space void with particles that pan opposite to the mouse,
+ * creating massive perceived depth behind the crisp 2D DOM UI.
+ *
+ * No Html, no glass mesh, no DOM children — strictly a visual background.
  */
-export default function SpatialCanvas({ children }) {
+export default function SpatialCanvas({ mousePos }) {
   return (
-    <>
-      {/* Full-screen WebGL layer — purely visual background */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        <Canvas
-          gl={{
-            antialias: true,
-            alpha: false,
-            toneMapping: THREE.ACESFilmicToneMapping,
-            toneMappingExposure: 1.2,
-          }}
-          style={{ background: '#020204' }}
-          dpr={[1, 1.5]}
-        >
-          <SpatialScene>
-            {/* This children prop is what App.jsx passes in (the Routes) */}
-            {children}
-          </SpatialScene>
-        </Canvas>
-      </div>
-    </>
+    <div className="fixed inset-0 z-0 pointer-events-none">
+      <Canvas
+        gl={{
+          antialias: true,
+          alpha: false,
+          toneMapping: THREE.ACESFilmicToneMapping,
+          toneMappingExposure: 1.2,
+        }}
+        style={{ background: '#020204' }}
+        dpr={[1, 1.5]}
+      >
+        <SpatialScene mousePos={mousePos} />
+      </Canvas>
+    </div>
   )
 }
