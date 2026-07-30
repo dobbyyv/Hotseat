@@ -97,13 +97,13 @@ export default function HubPage() {
                 key={g.id}
                 variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
                 transition={cardSpring}
-                whileHover={{ scale: 1.01 }}
+                whileHover={{ scale: 1.01, y: -2 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleEnterGroup(g)}
                 className={`relative overflow-hidden rounded-2xl p-6 cursor-pointer transition-all border ${
                   isLastActive
                     ? 'bg-zinc-800/80 border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.05)]'
-                    : 'bg-zinc-900/60 border-white/10 hover:bg-zinc-800/60 hover:border-white/20'
+                    : 'bg-zinc-900/40 border-white/10 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.3)]'
                 }`}
               >
                 {isLastActive && (

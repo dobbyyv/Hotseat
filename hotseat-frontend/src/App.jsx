@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { io } from 'socket.io-client'
@@ -55,10 +55,21 @@ function App() {
   const hasIdentity = !!user;
   const isFullyAuthenticated = hasIdentity && !!activeGroup;
 
-  // 🖱️ Mouse tracking for spotlight effect
-  const [mouse, setMouse] = useState({ x: 0, y: 0 })
+  // ── Living Atmosphere: Mouse-tracking spotlight grid ──
+  // useRef to avoid scheduling a React state update on every mousemove frame;
+  // we sync the ref value into state via rAF for the spotlight to follow smoothly.
+  const mouseRef = useRef({ x: 0, y: 0 })
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const rafRef = useRef(null)
+
   const handleMouseMove = useCallback((e) => {
-    setMouse({ x: e.clientX, y: e.clientY })
+    mouseRef.current = { x: e.clientX, y: e.clientY }
+    if (!rafRef.current) {
+      rafRef.current = requestAnimationFrame(() => {
+        setMousePos(mouseRef.current)
+        rafRef.current = null
+      })
+    }
   }, [])
 
   // Global WebSocket connection for real-time group updates
@@ -92,33 +103,77 @@ function App() {
     <BrowserRouter>
       <main
         onMouseMove={handleMouseMove}
-        className="relative min-h-screen w-full bg-[#09090b] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
+        className="relative min-h-screen w-full bg-[#08080c] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
       >
-        {/* Depth orbs behind grid */}
+        {/* ═══════════════════════════════════════════
+            LAYER 1 — Ambient Depth Orbs
+            Massive, slow-drifting blurred spheres that banish
+            the dead black void and give organic 3D depth.
+            ═══════════════════════════════════════════ */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
-          <div className="absolute top-1/4 left-1/3 w-96 h-96 bg-zinc-700/10 rounded-full blur-[128px] pointer-events-none -z-10" />
-          <div className="absolute bottom-1/3 right-1/3 w-96 h-96 bg-slate-500/10 rounded-full blur-[128px] pointer-events-none -z-10" />
+          {/* Top-left warm orb */}
+          <div
+            className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-zinc-800/15 blur-[160px] pointer-events-none"
+            style={{ animation: 'drift-orb-1 20s ease-in-out infinite alternate' }}
+          />
+          {/* Bottom-right cool orb */}
+          <div
+            className="absolute bottom-[-20%] right-[-10%] w-[55vw] h-[55vw] rounded-full bg-slate-900/20 blur-[160px] pointer-events-none"
+            style={{ animation: 'drift-orb-2 24s ease-in-out infinite alternate' }}
+          />
+          {/* Center accent orb — subtle warm bloom */}
+          <div
+            className="absolute top-[40%] left-[50%] -translate-x-1/2 -translate-y-1/2 w-[40vw] h-[40vw] rounded-full bg-zinc-700/10 blur-[140px] pointer-events-none"
+            style={{ animation: 'drift-orb-3 18s ease-in-out infinite alternate' }}
+          />
         </div>
 
-        {/* High-tech fading grid background */}
+        {/* ═══════════════════════════════════════════
+            LAYER 2 — The Spotlight Grid
+            Subtle tech grid revealed ONLY around the cursor
+            via a smooth radial gradient mask. Replaces the
+            old harsh elliptical mask that cut off abruptly.
+            ═══════════════════════════════════════════ */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(79,79,79,0.18) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,79,79,0.18) 1px, transparent 1px)',
-            backgroundSize: '14px 24px',
-            maskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 60% 50% at 50% 0%, #000 70%, transparent 100%)',
+              'linear-gradient(to right, rgba(249,250,251,0.04) 1px, transparent 1px), ' +
+              'linear-gradient(to bottom, rgba(249,250,251,0.04) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+            maskImage: `radial-gradient(700px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.15) 50%, transparent 70%)`,
+            WebkitMaskImage: `radial-gradient(700px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.15) 50%, transparent 70%)`,
           }}
         />
 
-        {/* Mouse-tracking spotlight overlay */}
+        {/* ═══════════════════════════════════════════
+            LAYER 3 — Interactive Spotlight Glow
+            Soft warm bloom that follows the cursor,
+            adding atmospheric depth to the spotlight area.
+            ═══════════════════════════════════════════ */}
         <div
-          className="absolute inset-0 z-0 pointer-events-none"
+          className="absolute inset-0 z-0 pointer-events-none transition-[background] duration-300 ease-out"
           style={{
-            background: `radial-gradient(600px circle at ${mouse.x}px ${mouse.y}px, rgba(255,255,255,0.06), transparent 80%)`,
+            background: `radial-gradient(700px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.08), transparent 75%)`,
           }}
         />
+
+        {/* ═══════════════════════════════════════════
+            LAYER 4 — Cinematic Film Grain (SVG Noise)
+            Fixed overlay that eliminates digital color
+            banding and gives the dark background physical
+            texture — like a 35mm print.
+            ═══════════════════════════════════════════ */}
+        <svg
+          className="fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay pointer-events-none"
+          aria-hidden="true"
+        >
+          <filter id="noise">
+            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+          <rect width="100%" height="100%" filter="url(#noise)" />
+        </svg>
 
         {/* Foreground container — responsive, centered */}
         <div className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-12 min-h-screen">

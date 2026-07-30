@@ -72,3 +72,19 @@ button:focus-visible {
   0% { background-position: 0% 0; }
   100% { background-position: -200% 0; }
 }
+
+/* ───── Ambient depth orb drift ───── */
+@keyframes drift-orb-1 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(8vw, 6vh) scale(1.08); }
+}
+
+@keyframes drift-orb-2 {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-6vw, -10vh) scale(1.05); }
+}
+
+@keyframes drift-orb-3 {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1.1) translate(4vw, -3vh); }
+}
