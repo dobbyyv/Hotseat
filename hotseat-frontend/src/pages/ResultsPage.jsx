@@ -206,7 +206,19 @@ export default function ResultsPage() {
     setGifQuery(val); if (gifDebounceRef.current) clearTimeout(gifDebounceRef.current)
     if (!val.trim()) { setGifs([]); return }
     setIsSearchingGifs(true)
-    gifDebounceRef.current = setTimeout(async () => { try { const r = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(val)}&limit=12&rating=pg-13`); const d = await r.json(); setGifs(d.data ?? []) } catch (err) { console.error('Giphy error', err) }; setIsSearchingGifs(false) }, 500)
+    gifDebounceRef.current = setTimeout(async () => {
+      try {
+        const r = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(val)}&limit=12&rating=pg-13`)
+        if (!r.ok) throw new Error(`Giphy API returned ${r.status}`)
+        const d = await r.json()
+        // Giphy wraps results in d.data; validate it's an array
+        setGifs(Array.isArray(d?.data) ? d.data : [])
+      } catch (err) {
+        console.error('Giphy error', err)
+        setGifs([])
+      }
+      setIsSearchingGifs(false)
+    }, 500)
   }
 
   const handleSendGif = url => { playSFX('thock'); emitMessage('gif', url); setShowGifPicker(false); setGifQuery(''); setGifs([]) }

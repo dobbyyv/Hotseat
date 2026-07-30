@@ -116,7 +116,7 @@ function App() {
     <BrowserRouter>
       <main
         ref={containerRef}
-        className="relative min-h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
+        className="relative h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans selection:bg-white/20 selection:text-white"
         style={{
           // Default CSS custom properties for spotlight/grid (updated via native mousemove)
           '--mx': '50%',
