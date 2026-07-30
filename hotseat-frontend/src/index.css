@@ -88,3 +88,16 @@ button:focus-visible {
   0% { transform: translate(-50%, -50%) scale(1); }
   100% { transform: translate(-50%, -50%) scale(1.1) translate(4vw, -3vh); }
 }
+
+/* ───── Subtle idle breathing pulse ───── */
+@keyframes breath-pulse {
+  0%, 100% { background-color: rgba(255, 255, 255, 0.005); }
+  50% { background-color: rgba(255, 255, 255, 0.015); }
+}
+
+/* ───── Film grain opacity oscillation ───── */
+@keyframes grain-breathe {
+  0% { opacity: 0.02; }
+  50% { opacity: 0.04; }
+  100% { opacity: 0.02; }
+}

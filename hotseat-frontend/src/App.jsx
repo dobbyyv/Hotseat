@@ -129,43 +129,59 @@ function App() {
         </div>
 
         {/* ═══════════════════════════════════════════
-            LAYER 2 — The Spotlight Grid
-            Subtle tech grid revealed ONLY around the cursor
-            via a smooth radial gradient mask. Replaces the
-            old harsh elliptical mask that cut off abruptly.
+            LAYER 2 — Dense Technical Grid
+            Ultra-fine 12px blueprint grid revealed only
+            around the cursor via a tight 180px radial mask.
+            Crisp, high-tech engineering aesthetic.
             ═══════════════════════════════════════════ */}
         <div
           className="absolute inset-0 z-0 pointer-events-none"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(249,250,251,0.04) 1px, transparent 1px), ' +
-              'linear-gradient(to bottom, rgba(249,250,251,0.04) 1px, transparent 1px)',
-            backgroundSize: '48px 48px',
-            maskImage: `radial-gradient(700px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.15) 50%, transparent 70%)`,
-            WebkitMaskImage: `radial-gradient(700px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.15) 50%, transparent 70%)`,
+              'linear-gradient(to right, rgba(249,250,251,0.03) 1px, transparent 1px), ' +
+              'linear-gradient(to bottom, rgba(249,250,251,0.03) 1px, transparent 1px)',
+            backgroundSize: '12px 12px',
+            // Tighter spotlight — 180px torch with gradual falloff
+            maskImage: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.05) 80%, transparent 100%)`,
+            WebkitMaskImage: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(0,0,0,1) 0%, rgba(0,0,0,0.4) 45%, rgba(0,0,0,0.05) 80%, transparent 100%)`,
           }}
         />
 
         {/* ═══════════════════════════════════════════
-            LAYER 3 — Interactive Spotlight Glow
-            Soft warm bloom that follows the cursor,
-            adding atmospheric depth to the spotlight area.
+            LAYER 3 — Tight Cursor Torch
+            A focused 180px pocket of warm light that
+            follows the cursor precisely — like a laser
+            beam, not a floodlight.
             ═══════════════════════════════════════════ */}
         <div
-          className="absolute inset-0 z-0 pointer-events-none transition-[background] duration-300 ease-out"
+          className="absolute inset-0 z-0 pointer-events-none transition-[background] duration-200 ease-out"
           style={{
-            background: `radial-gradient(700px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.08), transparent 75%)`,
+            background: `radial-gradient(180px circle at ${mousePos.x}px ${mousePos.y}px, rgba(255,255,255,0.1), transparent 80%)`,
           }}
         />
 
         {/* ═══════════════════════════════════════════
-            LAYER 4 — Cinematic Film Grain (SVG Noise)
+            LAYER 4 — Subtle Idle Breathing Pulse
+            An imperceptible full-viewport overlay that
+            slowly oscillates between 0.5% and 1.5% white
+            every 6 seconds. You won't notice it unless
+            you stare — it just makes the page feel alive.
+            ═══════════════════════════════════════════ */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none"
+          style={{ animation: 'breath-pulse 6s ease-in-out infinite' }}
+        />
+
+        {/* ═══════════════════════════════════════════
+            LAYER 5 — Cinematic Film Grain (SVG Noise)
             Fixed overlay that eliminates digital color
             banding and gives the dark background physical
-            texture — like a 35mm print.
+            texture — like a 35mm print. Now breathes
+            subtly (opacity oscillates 0.02–0.04).
             ═══════════════════════════════════════════ */}
         <svg
-          className="fixed inset-0 z-50 opacity-[0.03] mix-blend-overlay pointer-events-none"
+          className="fixed inset-0 z-50 mix-blend-overlay pointer-events-none"
+          style={{ animation: 'grain-breathe 8s ease-in-out infinite alternate' }}
           aria-hidden="true"
         >
           <filter id="noise">
