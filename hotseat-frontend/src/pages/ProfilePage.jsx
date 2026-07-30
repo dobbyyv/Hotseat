@@ -60,7 +60,7 @@ export default function ProfilePage() {
   }, [group])
 
   // Typing effect for group name display
-  const typedGroupName = useTypingEffect(group?.name || '', 50)
+  const { displayed: typedGroupName, isTyping: groupNameTyping } = useTypingEffect(group?.name || '', 50)
 
   if (!user) return null
 
@@ -318,7 +318,7 @@ export default function ProfilePage() {
                       </div>
                     ) : (
                       <div className="flex items-center gap-3">
-                        <span className="text-white font-bold font-display text-2xl tracking-tight">{typedGroupName}<span className="animate-pulse text-violet-400">|</span></span>
+                        <span className="text-white font-bold font-display text-2xl tracking-tight">{typedGroupName}{groupNameTyping && <span className="animate-pulse text-violet-400">|</span>}</span>
                         <button onClick={() => { playSFX('click'); setIsEditing(true) }} className="text-gray-500 hover:text-violet-400 transition-colors p-2 bg-white/5 rounded-full">
                           <Edit2 size={14} />
                         </button>

@@ -11,7 +11,7 @@ const sounds = {
 
 // 2. Mix audio levels
 Object.values(sounds).forEach(audio => {
-  audio.volume = 0.4; 
+  audio.volume = 0.6; 
 });
 
 export default function useSFX() {

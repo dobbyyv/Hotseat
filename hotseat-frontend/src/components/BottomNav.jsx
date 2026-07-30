@@ -24,7 +24,7 @@ export default function BottomNav({ active }) {
       return;
     }
 
-    playSFX(tab.id === 'hub' || tab.id === 'info' || tab.id === 'profile' ? 'woosh' : 'click');
+    playSFX('woosh');
     
     if (tab.id === 'hub') {
       clearActiveGroup();
