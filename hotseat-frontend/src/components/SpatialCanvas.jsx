@@ -105,7 +105,7 @@ function SpatialScene({ children }) {
       />
 
       {/* HDRI environment for realistic glass reflections */}
-      <Environment preset="night" />
+      <Environment files="/hdri/night.hdr" />
 
       {/* Ambient fill light */}
       <ambientLight intensity={0.3} />
