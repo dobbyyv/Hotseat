@@ -256,14 +256,14 @@ export default function ResultsPage() {
         <button onClick={() => setAnswersCollapsed(c => !c)} className="w-full flex items-center justify-between py-2 text-zinc-500 hover:text-zinc-300 transition-colors mb-2">
           <span className="text-white text-[11px] font-bold uppercase tracking-widest">{isTagQuestion ? 'Vote Breakdown' : 'Answers'}</span>
           <div className="flex items-center gap-2">
-            {!isFetchingAnswers && groupAnswers.length > 0 && <span className="bg-white/10 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/10">{groupAnswers.length}</span>}
+            {!isFetchingAnswers && (groupAnswers?.length > 0) && <span className="bg-white/10 text-zinc-300 text-[10px] font-bold px-2 py-0.5 rounded-full border border-white/10">{groupAnswers.length}</span>}
             {answersCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
           </div>
         </button>
         <motion.div animate={{ height: answersCollapsed ? 0 : 'auto' }} transition={{ duration: 0.28, ease: [0.25, 0.46, 0.45, 0.94] }} style={{ overflow: 'hidden' }}>
           <div className="pt-2">
             {isFetchingAnswers ? <div className="flex justify-center py-8"><Loader2 size={22} className="text-zinc-400 animate-spin" /></div>
-            : groupAnswers.length === 0 ? <p className="text-zinc-600 text-sm text-center py-8">No answers yet — be the first!</p>
+            : !groupAnswers || groupAnswers.length === 0 ? <p className="text-zinc-600 text-sm text-center py-8">No answers yet — be the first!</p>
             : isTagQuestion ? <VoteBreakdown answers={groupAnswers} groupMembers={group?.members} serverUrl={SERVER_URL} revealed={revealed} />
             : <div className="space-y-3">{groupAnswers.map((ans, i) => <AnswerCard key={ans.user_id} ans={ans} index={i} isMe={ans.user_id === user.id} revealed={revealed} serverUrl={SERVER_URL} />)}</div>}
           </div>

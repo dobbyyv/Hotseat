@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react'
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion } from 'framer-motion'
 import { io } from 'socket.io-client'
 
 import BottomNav from './components/BottomNav'
@@ -16,6 +17,37 @@ import InfoPage from './pages/InfoPage'
 import useStore from './store/useStore'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
+
+function AnimatedRoutes() {
+  const location = useLocation()
+  const { user, group: activeGroup } = useStore()
+  const hasIdentity = !!user
+  const isFullyAuthenticated = hasIdentity && !!activeGroup
+
+  return (
+    <AnimatePresence mode="wait">
+      <motion.div
+        key={location.pathname}
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={{ opacity: 0, y: -8 }}
+        transition={{ duration: 0.2, ease: 'easeOut' }}
+      >
+        <Routes location={location}>
+          <Route path="/" element={hasIdentity ? <Navigate to="/hub" /> : <JoinPage />} />
+          <Route path="/hub" element={hasIdentity ? <HubPage /> : <Navigate to="/" />} />
+          <Route path="/home" element={isFullyAuthenticated ? <HomePage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+          <Route path="/answer" element={isFullyAuthenticated ? <AnswerPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+          <Route path="/results" element={isFullyAuthenticated ? <ResultsPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+          <Route path="/profile" element={hasIdentity ? <ProfilePage /> : <Navigate to="/" />} />
+          <Route path="/manage-group" element={isFullyAuthenticated ? <ManageGroup /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+          <Route path="/info" element={isFullyAuthenticated ? <InfoPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </motion.div>
+    </AnimatePresence>
+  )
+}
 
 function App() {
   const { user, group: activeGroup } = useStore()
@@ -90,26 +122,7 @@ function App() {
 
         {/* Foreground container — responsive, centered */}
         <div className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-12 min-h-screen">
-          <Routes>
-            <Route 
-              path="/" 
-              element={hasIdentity ? <Navigate to="/hub" /> : <JoinPage />} 
-            />
-            
-            <Route 
-              path="/hub" 
-              element={hasIdentity ? <HubPage /> : <Navigate to="/" />} 
-            />
-
-            <Route path="/home" element={isFullyAuthenticated ? <HomePage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-            <Route path="/answer" element={isFullyAuthenticated ? <AnswerPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-            <Route path="/results" element={isFullyAuthenticated ? <ResultsPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-            <Route path="/profile" element={hasIdentity ? <ProfilePage /> : <Navigate to="/" />} />
-            <Route path="/manage-group" element={isFullyAuthenticated ? <ManageGroup /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-            <Route path="/info" element={isFullyAuthenticated ? <InfoPage /> : <Navigate to={hasIdentity ? "/hub" : "/"} />} />
-            
-            <Route path="*" element={<Navigate to="/" />} />
-          </Routes>
+          <AnimatedRoutes />
         </div>
 
         {/* Bottom navigation — always on top */}

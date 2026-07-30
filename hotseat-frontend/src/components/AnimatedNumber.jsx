@@ -6,12 +6,15 @@ import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
  * creating a premium odometer/count-up effect.
  */
 export default function AnimatedNumber({ value, suffix = '', className = '' }) {
-  const motionVal = useMotionValue(0)
+  // Safe default — prevents NaN/undefined from crashing Framer Motion
+  const safeValue = Number.isFinite(value) ? value : 0
+
+  const motionVal = useMotionValue(safeValue)
   const spring = useSpring(motionVal, { stiffness: 80, damping: 20, mass: 0.5 })
-  const rounded = useTransform(spring, (v) => Math.round(v))
+  const rounded = useTransform(spring, (v) => Math.round(Number.isFinite(v) ? v : 0))
 
   useEffect(() => {
-    motionVal.set(value)
+    motionVal.set(Number.isFinite(value) ? value : 0)
   }, [value, motionVal])
 
   return (
