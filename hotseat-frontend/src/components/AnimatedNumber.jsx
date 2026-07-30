@@ -9,7 +9,7 @@ import { motion, useMotionValue, useSpring, useMotionValueEvent } from 'framer-m
  * (a plain number). This prevents a raw Framer Motion MotionValue object from
  * ever leaking as a React child, which causes React error #31.
  */
-export default function AnimatedNumber({ value, suffix = '', className = '' }) {
+export default function AnimatedNumber({ value, suffix = '', className = '', padTo = 0 }) {
   // Safe default — prevents NaN/undefined from crashing Framer Motion
   const safeValue = Number.isFinite(value) ? value : 0
 
@@ -28,9 +28,11 @@ export default function AnimatedNumber({ value, suffix = '', className = '' }) {
     motionVal.set(Number.isFinite(value) ? value : 0)
   }, [value, motionVal])
 
+  const rendered = padTo > 0 ? String(display).padStart(padTo, '0') : display
+
   return (
     <motion.span className={className}>
-      {display}{suffix}
+      {rendered}{suffix}
     </motion.span>
   )
 }

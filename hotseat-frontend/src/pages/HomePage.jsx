@@ -51,11 +51,11 @@ function CountdownTimer({ lang }) {
   const timerDisplay = useMemo(() => (
     <span className="text-xs font-mono font-bold tracking-widest uppercase text-zinc-500">
       {lang === 'en' ? 'New question in' : 'Nuova domanda tra'}{' '}
-      <AnimatedNumber value={time.hours} className="text-zinc-200" />
+      <AnimatedNumber value={time.hours} padTo={2} className="text-zinc-200" />
       <span className="text-zinc-500 mx-0.5">:</span>
-      <AnimatedNumber value={time.minutes} className="text-zinc-200" />
+      <AnimatedNumber value={time.minutes} padTo={2} className="text-zinc-200" />
       <span className="text-zinc-500 mx-0.5">:</span>
-      <AnimatedNumber value={time.seconds} className="text-zinc-200" />
+      <AnimatedNumber value={time.seconds} padTo={2} className="text-zinc-200" />
     </span>
   ), [time.hours, time.minutes, time.seconds, lang])
 

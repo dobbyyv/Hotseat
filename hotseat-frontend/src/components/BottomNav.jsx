@@ -33,7 +33,7 @@ export default function BottomNav() {
       playSFX('error')
       return
     }
-    playSFX('woosh')
+    // Pages play their own entry SFX on mount — don't double-fire
     if (tab.id === 'hub') {
       clearActiveGroup()
       navigate('/hub')
