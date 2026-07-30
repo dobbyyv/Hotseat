@@ -7,6 +7,7 @@ import useStore from '../store/useStore'
 import { t } from '../translations'
 import { subscribeToPushNotifications } from '../pushUtility'
 import useSFX from '../useSFX'
+import AnimatedNumber from '../components/AnimatedNumber'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL
 const GIPHY_KEY = import.meta.env.VITE_GIPHY_KEY || ''
@@ -55,12 +56,26 @@ function VoteBreakdown({ answers, groupMembers, serverUrl, revealed }) {
               <span className="text-white font-bold text-sm tracking-tight">{entry.name}</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-zinc-300 font-bold">{entry.pct}%</span>
+              <AnimatedNumber value={entry.pct} suffix="%" className="font-mono text-sm text-zinc-300 font-bold" />
               <span className="text-zinc-600 text-xs">{entry.count} vote{entry.count !== 1 ? 's' : ''}</span>
             </div>
           </div>
+          {/* PILLAR 4: Elevated progress bar with winner glow + shimmer */}
           <div className="w-full h-3 bg-zinc-800/80 rounded-full overflow-hidden p-[2px] border border-white/5 mb-2.5">
-            <motion.div initial={{ width: 0 }} animate={revealed ? { width: `${entry.pct}%` } : { width: 0 }} transition={{ delay: i * 0.1 + 0.15, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }} className="bg-gradient-to-r from-zinc-100 to-zinc-400 rounded-full h-full" />
+            <motion.div
+              initial={{ width: 0 }}
+              animate={revealed ? { width: `${entry.pct}%` } : { width: 0 }}
+              transition={{ delay: i * 0.1 + 0.15, duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className={`rounded-full h-full relative overflow-hidden ${i === 0 ? 'bg-gradient-to-r from-amber-100 via-white to-amber-200 shadow-[0_0_12px_rgba(251,191,36,0.3)]' : 'bg-gradient-to-r from-zinc-100 to-zinc-400'}`}
+            >
+              {i === 0 && revealed && (
+                <motion.div
+                  animate={{ x: ['-100%', '200%'] }}
+                  transition={{ repeat: Infinity, duration: 2.5, ease: 'linear', delay: 0.8 }}
+                  className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent"
+                />
+              )}
+            </motion.div>
           </div>
           <div className="flex items-center gap-2 pl-0.5">
             <div className="flex -space-x-1.5">
@@ -142,9 +157,7 @@ export default function ResultsPage() {
   const [isSearchingGifs, setIsSearchingGifs] = useState(false)
   const gifDebounceRef = useRef(null)
 
-  // Auto-scroll to bottom
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
-
   useEffect(() => { playSFX('woosh') }, [playSFX])
   useEffect(() => { if (!question) fetchTodayQuestion() }, [question, fetchTodayQuestion])
   useEffect(() => { if (todayAnswered && question) { fetchGroupAnswers(); setTimeout(() => setRevealed(true), 400) } }, [todayAnswered, question, fetchGroupAnswers])
@@ -227,13 +240,15 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Vote Breakdown Bento Card */}
+      {/* PILLAR 3: Vote Breakdown Bento Card with breathing border */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden"
+        className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 md:p-8 shadow-xl relative overflow-hidden group"
       >
+        {/* Ambient animated border sweep on hover */}
+        <div className="absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.03) 50%, transparent 100%)', backgroundSize: '200% 100%', animation: 'shimmer 3s ease-in-out infinite' }} />
         <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
         <p className="text-xl md:text-2xl font-semibold tracking-tight text-zinc-100 mb-6 leading-snug">
           {question[`text_${lang}`] ?? question.text}
@@ -270,8 +285,10 @@ export default function ResultsPage() {
         <div ref={chatScrollRef} className="flex-1 min-h-[200px] overflow-y-auto overscroll-contain space-y-3 mb-4">
           {messages.length === 0 && (
             <div className="flex items-center justify-center h-full">
-              <span className="font-mono text-xs text-zinc-500 bg-zinc-950/50 border border-white/5 px-4 py-2 rounded-full mx-auto animate-pulse">
-                No messages yet. Start the chaos ↓
+              {/* PILLAR 3: Terminal pill with radar ping */}
+              <span className="font-mono text-xs text-zinc-500 bg-zinc-950/50 border border-white/5 px-4 py-2 rounded-full mx-auto animate-pulse relative">
+                <span className="absolute inset-0 rounded-full bg-white/5 animate-ping" />
+                <span className="relative">No messages yet. Start the chaos ↓</span>
               </span>
             </div>
           )}

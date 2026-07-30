@@ -8,12 +8,16 @@ import {
 import { io } from 'socket.io-client'
 import useStore from '../store/useStore'
 import { t } from '../translations'
-import useSFX from '../useSFX' 
+import useSFX from '../useSFX'
+import AnimatedNumber from '../components/AnimatedNumber'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL
 
 function CountdownTimer({ lang }) {
-  const [timeLeft, setTimeLeft] = useState('')
+  const [hours, setHours] = useState(0)
+  const [minutes, setMinutes] = useState(0)
+  const [seconds, setSeconds] = useState(0)
+
   useEffect(() => {
     const calc = () => {
       const now = new Date()
@@ -21,19 +25,23 @@ function CountdownTimer({ lang }) {
       next.setHours(9, 0, 0, 0)
       if (now.getHours() >= 9) next.setDate(next.getDate() + 1)
       const diff = next - now
-      const h = Math.floor((diff / 3600000) % 24).toString().padStart(2, '0')
-      const m = Math.floor((diff / 60000) % 60).toString().padStart(2, '0')
-      const s = Math.floor((diff / 1000) % 60).toString().padStart(2, '0')
-      return `${h}:${m}:${s}`
+      setHours(Math.max(0, Math.floor((diff / 3600000) % 24)))
+      setMinutes(Math.max(0, Math.floor((diff / 60000) % 60)))
+      setSeconds(Math.max(0, Math.floor((diff / 1000) % 60)))
     }
-    setTimeLeft(calc())
-    const timer = setInterval(() => setTimeLeft(calc()), 1000)
+    calc()
+    const timer = setInterval(calc, 1000)
     return () => clearInterval(timer)
   }, [])
+
   return (
-    <span className="text-xs font-mono font-bold tracking-widest uppercase">
+    <span className="text-xs font-mono font-bold tracking-widest uppercase text-zinc-500">
       {lang === 'en' ? 'New question in' : 'Nuova domanda tra'}{' '}
-      <span className="text-zinc-200">{timeLeft}</span>
+      <AnimatedNumber value={hours} className="text-zinc-200" />
+      <span className="text-zinc-500 mx-0.5">:</span>
+      <AnimatedNumber value={minutes} className="text-zinc-200" />
+      <span className="text-zinc-500 mx-0.5">:</span>
+      <AnimatedNumber value={seconds} className="text-zinc-200" />
     </span>
   )
 }
@@ -134,7 +142,9 @@ export default function HomePage() {
           {answeredCount > 0 && (
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium">{answeredCount} IN</span>
+              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium animate-breath">
+                <AnimatedNumber value={answeredCount} /> IN
+              </span>
             </motion.div>
           )}
         </div>
