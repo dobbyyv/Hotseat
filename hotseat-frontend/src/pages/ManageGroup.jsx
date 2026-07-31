@@ -34,35 +34,41 @@ export default function ManageGroup() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => navigate('/profile')} className="text-zinc-400 flex items-center gap-2 mb-8 hover:text-white transition-colors cursor-pointer w-max bg-zinc-800/80 border border-white/10 px-4 py-2 rounded-xl">
-        <ArrowLeft size={18} /> <span className="text-xs font-bold uppercase tracking-widest">Back</span>
-      </motion.button>
-      
-      <div className="mb-8">
-        <h2 className="text-white text-2xl font-bold font-display tracking-tight mb-1">Manage Group Members</h2>
-        <p className="text-zinc-500 text-sm">Group Code: <span className="font-mono text-white font-bold">{group.code}</span></p>
+    <div className="h-full flex flex-col">
+      {/* Header — flex-shrink-0 */}
+      <div className="flex-shrink-0">
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => navigate('/profile')} className="text-zinc-400 flex items-center gap-2 mb-6 hover:text-white transition-colors cursor-pointer w-max bg-zinc-800/80 border border-white/10 px-4 py-2 rounded-xl">
+          <ArrowLeft size={18} /> <span className="text-xs font-bold uppercase tracking-widest">Back</span>
+        </motion.button>
+
+        <div className="mb-6">
+          <h2 className="text-white text-2xl font-bold font-display tracking-tight mb-1">Manage Group Members</h2>
+          <p className="text-zinc-500 text-sm">Group Code: <span className="font-mono text-white font-bold">{group.code}</span></p>
+        </div>
       </div>
       
-      <div className="space-y-3">
-        {group.members?.map((m) => (
-          <motion.div key={m.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
-            className="bg-zinc-900/60 p-4 rounded-2xl flex justify-between items-center border border-white/10">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{m.avatar_text}</div>
-              <span className="text-white font-medium font-display text-sm">{m.name} {m.id === user.id && '(You)'}</span>
+      {/* Scrollable member list — clears the floating nav pill */}
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-32">
+        <div className="space-y-3">
+          {group.members?.map((m) => (
+            <motion.div key={m.id} layout initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className="bg-zinc-900/60 p-4 rounded-2xl flex justify-between items-center border border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-zinc-800 border border-white/10 flex items-center justify-center text-white font-bold text-xs flex-shrink-0">{m.avatar_text}</div>
+                <span className="text-white font-medium font-display text-sm">{m.name} {m.id === user.id && '(You)'}</span>
+              </div>
+              {m.id !== user.id && (
+                <button onClick={() => kickMember(m.id)} className="text-red-500/80 hover:bg-red-500/10 p-3 rounded-xl transition-colors cursor-pointer"><Trash2 size={18} /></button>
+              )}
+            </motion.div>
+          ))}
+          {(!group.members || group.members.length === 0) && (
+            <div className="text-center py-10">
+              <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full mx-auto mb-2" />
+              <p className="text-zinc-500 text-sm">Loading roster...</p>
             </div>
-            {m.id !== user.id && (
-              <button onClick={() => kickMember(m.id)} className="text-red-500/80 hover:bg-red-500/10 p-3 rounded-xl transition-colors cursor-pointer"><Trash2 size={18} /></button>
-            )}
-          </motion.div>
-        ))}
-        {(!group.members || group.members.length === 0) && (
-          <div className="text-center py-10">
-            <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: "linear" }} className="w-6 h-6 border-2 border-white/20 border-t-white rounded-full mx-auto mb-2" />
-            <p className="text-zinc-500 text-sm">Loading roster...</p>
-          </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   )

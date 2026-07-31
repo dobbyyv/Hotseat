@@ -56,10 +56,16 @@ export default function AnswerPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => { playSFX('woosh'); navigate('/home') }} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-8 w-max bg-zinc-800/80 border border-white/10 px-4 py-2 rounded-xl">
-        <ArrowLeft size={16} /><span className="text-xs font-bold uppercase tracking-widest">{text.back || 'Back'}</span>
-      </motion.button>
+    <div className="h-full flex flex-col">
+      {/* Header — flex-shrink-0 */}
+      <div className="flex-shrink-0">
+        <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }} onClick={() => { playSFX('woosh'); navigate('/home') }} className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors mb-6 w-max bg-zinc-800/80 border border-white/10 px-4 py-2 rounded-xl">
+          <ArrowLeft size={16} /><span className="text-xs font-bold uppercase tracking-widest">{text.back || 'Back'}</span>
+        </motion.button>
+      </div>
+
+      {/* Scrollable content — clears the floating nav pill */}
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-32">
 
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
         <span className="inline-block bg-white/10 text-zinc-300 border border-white/10 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full mb-5">
@@ -138,6 +144,9 @@ export default function AnswerPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      </div>
+      {/* end scrollable content */}
     </div>
   )
 }
