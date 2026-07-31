@@ -43,8 +43,8 @@ export default function BottomNav() {
   }
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
-      <div className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-full px-3 py-2 shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-1">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 lg:left-4 lg:top-1/2 lg:-translate-y-1/2 lg:bottom-auto lg:translate-x-0">
+      <div className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 rounded-full px-3 py-2 lg:rounded-3xl lg:px-2 lg:py-3 shadow-[0_10px_30px_rgba(0,0,0,0.8)] flex items-center gap-1 lg:flex-col lg:gap-1.5">
         {tabs.map(tab => {
           const Icon = tab.icon
           const isActive = active === tab.id
@@ -78,7 +78,7 @@ export default function BottomNav() {
                 <motion.span
                   initial={{ opacity: 0, width: 0 }}
                   animate={{ opacity: 1, width: 'auto' }}
-                  className="relative z-10 text-xs font-semibold text-white whitespace-nowrap overflow-hidden"
+                  className="relative z-10 text-xs font-semibold text-white whitespace-nowrap overflow-hidden lg:hidden"
                 >
                   {tab.label}
                 </motion.span>
