@@ -97,7 +97,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <main className="relative h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans select-none">
+      <main className="relative h-[100dvh] w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans select-none flex flex-col">
         {/* Ambient depth orbs */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-zinc-800/12 blur-[160px] pointer-events-none" />
@@ -123,12 +123,12 @@ function App() {
           <rect width="100%" height="100%" filter="url(#noise)" />
         </svg>
 
-        {/* Foreground container — responsive, centered */}
-        <div className="relative z-10 w-full max-w-4xl mx-auto p-6 md:p-12 h-full">
+        {/* Foreground container — fills remaining space in flex stack */}
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 pt-6 pb-2 md:px-12 md:pt-12 md:pb-3 flex-1 min-h-0 overflow-hidden">
           <AnimatedRoutes />
         </div>
 
-        {/* Bottom navigation — always on top */}
+        {/* Bottom navigation — native to the flex stack, no fixed positioning */}
         <BottomNav />
       </main>
     </BrowserRouter>

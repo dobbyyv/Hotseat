@@ -29,19 +29,13 @@
   }
 }
 
-
-::-webkit-scrollbar {
-  width: 5px;
+/* ───── Global invisible scrollbars ───── */
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.15);
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }
 
 /* ───── Focus ring animation ───── */
@@ -73,23 +67,3 @@ button:focus-visible {
   0% { background-position: 0% 0; }
   100% { background-position: -200% 0; }
 }
-
-/* ───── Custom dark-mode chat scrollbar ───── */
-.chat-scrollbar {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.12) transparent;
-}
-.chat-scrollbar::-webkit-scrollbar {
-  width: 5px;
-}
-.chat-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-}
-.chat-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.12);
-  border-radius: 10px;
-}
-.chat-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.22);
-}
-
