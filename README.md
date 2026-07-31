@@ -13,88 +13,175 @@ Instead of treating it like a static homework assignment, I started "min-maxing"
 
 **Live Demo:** [hotseat.site](https://hotseat.site)
 
-## Architecture Overview
+---
 
-```
-hotseat/
-├── hotseat-backend/               # Express API server + static file hosting
-│   ├── server.js                  # Entry point — middleware, route mounting, Socket.IO, cron init
-│   ├── config/
-│   │   ├── db.js                  # PostgreSQL connection pool + idempotent schema migrations
-│   │   └── env.js                 # Environment variable validation (dotenv)
-│   ├── routes/
-│   │   ├── authRoutes.js          # Join, password, recovery, profile picture upload
-│   │   ├── groupRoutes.js         # Create/join/leave groups, rename, kick members
-│   │   ├── answerRoutes.js        # Daily question, submit answer, calendar, recap, push subscribe
-│   │   └── chatRoutes.js          # Chat history fetch, chat image upload
-│   ├── sockets/
-│   │   └── socketHandler.js       # Socket.IO: room management, chat broadcast, push notifications
-│   ├── middleware/
-│   │   ├── rateLimiter.js         # Express rate limiters (general, strict, suggestion)
-│   │   ├── logger.js              # Request/response logging with status-coloured output
-│   │   └── upload.js              # Multer config for profile picture and chat image uploads
-│   ├── cron/
-│   │   └── dailyDrop.js           # 9:00 AM daily question rotation + push notification broadcast
-│   ├── .env.example               # Backend environment variable template
-│   └── uploads/                   # User-uploaded avatars and chat media (gitignored)
-├── hotseat-frontend/              # React SPA (Vite + TailwindCSS)
-│   ├── src/
-│   │   ├── store/useStore.js      # Zustand global state (persisted to localStorage)
-│   │   ├── pages/                 # Route-level page components
-│   │   ├── components/            # Shared UI components (BottomNav)
-│   │   ├── useSFX.js              # Sound effects hook
-│   │   ├── pushUtility.js         # Web push subscription client
-│   │   └── translations.js        # i18n dictionary (English / Italian)
-│   ├── .env.example               # Frontend environment variable template
-│   └── dist/                      # Production build output (gitignored)
-├── .gitignore                     # Comprehensive ignore rules (env, secrets, uploads, DB dumps, etc.)
-├── LICENSE                        # MIT License
-└── README.md
-```
+## Features
 
-## Design Philosophy
+### Daily Question Engine
+- Cron-driven 9:00 AM CET question rotation with archived answer history
+- Polymorphic question types: open‑ended text, ranked member voting, multiple choice, 0–100 sliders
+- Legacy type aliasing (`tag` → `vote_member`) with keyword‑based type inference fallback
+- Targeted questions — user names are injected at render time via `{TARGET}` placeholders
+- User‑submitted question suggestions with per‑IP rate limiting
 
-- **Single-instance server** — The Express API serves both the REST layer and the production React build from a single Node.js process. No separate static file server or reverse proxy required.
-- **Idempotent infrastructure** — Schema migrations use `IF NOT EXISTS` guards exclusively. The server boot sequence (`config/db.js → initDatabase()`) is safe to run repeatedly under PM2 restarts without corrupting existing data.
-- **Thin middleware pipeline** — Each middleware module (rate limiting, logging, file upload) is isolated in its own file. Route handlers delegate to dedicated router modules, keeping `server.js` under 70 lines.
-- **State lives in the database** — No Redis, no in-memory caches. Group membership, answers, and chat history are all queryable via parameterized SQL. The Zustand frontend store acts as a local cache only, hydrated from API responses.
-- **Push over poll** — Real-time updates (chat, answer submissions, group changes) are delivered via WebSocket events rather than client-side polling. Web push notifications serve as the offline fallback channel.
+### Real‑Time Social Hub
+- Socket.IO‑powered live group chat with message persistence in PostgreSQL
+- Typing indicators with automatic timeout
+- Image uploads (10 MB limit) and GIPHY GIF search via the Giphy API
+- Quick emoji reactions and custom dark WebKit scrollbar styling
+- Answer‑submitted notifications broadcast instantly to all room members
 
-## Core Features
+### Canvas Physics & Visual Atmosphere
+- 48‑particle interactive physics engine (`OrbField`) — elastic collisions, wall bounce with energy damping, grab‑and‑fling pointer interaction with momentum trails
+- Sub‑surface glow diffusion via `ctx.shadowBlur` on each orb, casting light through translucent UI panels stacked above the canvas
+- Mouse‑tracked spotlight grid with radial mask and cursor torch, updated via a zero‑React‑rerender `requestAnimationFrame` loop writing CSS custom properties directly to the DOM
+- SVG film grain overlay and static ambient depth orbs for layered atmosphere
 
-- **Daily question drop** — A cron job selects a random question each day at 9:00 AM CET, with support for multiple UI types (text, slider, multiple choice, tag-a-friend) and targeted questions (personalized by inserting the target's name).
-- **Multi-group support** — Users belong to one or more groups, each with its own invite code, roster, and daily question stream.
-- **Real-time results** — Once a user answers, they see other members' answers with staggered reveal animations. Tag-type questions show a ranked vote breakdown with progress bars and voter avatars.
-- **Live group chat** — WebSocket-powered chat with text messages, image uploads, GIPHY search, and typing indicators. Chat history persists across sessions and resets daily.
-- **Answer archive & calendar** — Every answer is archived daily. Users can browse a monthly calendar grid to revisit past questions and answers per day.
-- **Weekly/Monthly recaps** — Leaderboard-style awards: MVP, Novelist (longest answers), Speedster (fastest to answer), Ghost (least active), and Hottest Day.
-- **Push notifications** — Web push (VAPID) for daily question alerts and group activity. Users subscribe from the results page.
-- **Account recovery** — Optional bcrypt-hashed password lets users recover their account across devices or after clearing browser data.
-- **Admin controls** — Any group member can manage the roster (kick members), rename the group, and leave.
-- **i18n** — English and Italian translations via a runtime dictionary.
-- **Rate limiting** — Express rate limiters protect join, answer, upload, and suggestion endpoints.
-- **Security headers** — Helmet middleware sets `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, and other security headers.
+### UI / UX Architecture
+- Strict viewport‑locked layout (`h-screen` root with `overflow: hidden`) — zero global scroll bleed
+- Flex chain (`h‑screen → h‑full → flex‑1 min‑h‑0`) ensures chat containers never overflow the viewport
+- Global `select‑none` on the root wrapper with explicit `select‑text` on all textarea inputs
+- Animated route transitions via Framer Motion `AnimatePresence` with crossfade directionality
+- Zinc monochrome design system with glassmorphic panels (`backdrop‑blur‑2xl`, semi‑transparent dark overlays)
+- Zero‑padded odometer‑style countdown timer using `useMotionValueEvent` for spring‑driven number animation
+- Sound effect system with cloned `Audio` nodes for gapless overlapping playback
+
+### Account & Group Management
+- Multi‑group support — users belong to one or more groups, each with its own invite code, roster, and daily question stream
+- Admin controls — kick members, rename groups, leave groups (broadcast via WebSocket)
+- Optional bcrypt‑hashed password for cross‑device account recovery
+- Profile picture upload with UUID‑based safe filenames
+- Zustand state management with `persist` middleware — auth state survives page reloads
+
+### Data & Analytics
+- Answer archive with calendar‑grid date browsing
+- Weekly/monthly recap leaderboards (MVP, Novelist, Speedster, Ghost, Hottest Day)
+- Web push notifications (VAPID) for daily question alerts with stale subscription auto‑cleanup
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
-| Frontend | React 18, Vite 5, TailwindCSS 4, Framer Motion 11, React Router DOM 6, Zustand 5 |
-| Backend | Node.js, Express 5, Socket.IO 4, node-cron, bcrypt 6, multer, web-push |
-| Database | PostgreSQL via node-postgres (pg) |
+|---|---|
+| **Frontend Framework** | React 18, Vite 5 |
+| **Styling** | Tailwind CSS 4, `@tailwindcss/vite` |
+| **Animation** | Framer Motion 11, HTML5 Canvas 2D |
+| **Routing** | React Router DOM 6 |
+| **State** | Zustand 5 (with `persist` middleware) |
+| **Icons** | Lucide React |
+| **Backend Runtime** | Node.js, Express 5 |
+| **Real‑Time** | Socket.IO 4 |
+| **Database** | PostgreSQL via `node-postgres` (`pg`) |
+| **Scheduling** | `node-cron` |
+| **Auth / Recovery** | `bcrypt` |
+| **Push Notifications** | `web-push` (VAPID) |
+| **File Uploads** | `multer` |
+| **Security** | `helmet`, `express-rate-limit`, `cors` |
+| **Testing** | Jest, Supertest |
 
-## Local Setup
+## Architecture
+
+### Layout Strategy
+
+The entire viewport is locked at `h-screen overflow-hidden` on the root `<main>` element. Every interior container uses `h-full` to form an unbroken flex chain down to the deepest scrollable region (`flex-1 min-h-0 overflow-y-auto`). This guarantees that chat panels and result cards never push the bottom navigation bar off‑screen, regardless of message count.
+
+### State Flow
+
+```
+Zustand Store (persisted to localStorage)
+ ├─ user / group / streak / lang     ← survives page reloads
+ ├─ currentQuestion / groupAnswers   ← fetched fresh from API on mount
+ └─ UI flags (isLoading, error)      ← ephemeral, never persisted
+
+Socket.IO
+ ├─ join_room / leave_room           ← membership validated against DB on every join
+ ├─ send_message → receive_message   ← broadcast + PostgreSQL persistence
+ └─ answer_submitted                 ← triggers store.fetchGroupAnswers() client‑side
+```
+
+### Background Rendering Stack (z‑index order)
+
+| Layer | z‑index | Role |
+|---|---|---|
+| Static ambient orbs (blurred divs) | `z‑0` | Atmospheric depth |
+| `<OrbField />` canvas | `z‑0` | Interactive physics particles with shadowBlur glow |
+| Spotlight grid + cursor torch | `z‑[5]` | Mouse‑tracked radial mask over 18px dot grid |
+| Film grain SVG | `z‑50` | `mix‑blend‑overlay` at 3% opacity |
+| Foreground UI container | `z‑10` | Routes, panels, bottom nav — all above canvas |
+
+The canvas sits **behind** the UI. Semi‑transparent glassmorphic panels (`bg‑zinc‑900/60 backdrop‑blur‑2xl`) diffuse the orb glow natively via the GPU compositor — no JavaScript DOM tracking needed.
+
+## Project Structure
+
+```
+hotseat/
+├── hotseat-backend/
+│   ├── server.js                  # Express entry — middleware, routes, Socket.IO, cron
+│   ├── config/
+│   │   ├── db.js                  # PostgreSQL pool + idempotent schema auto‑patch
+│   │   └── env.js                 # Environment variable validation
+│   ├── routes/
+│   │   ├── authRoutes.js          # Join, password, recovery, profile picture upload
+│   │   ├── groupRoutes.js         # Create/join/leave groups, rename, kick members
+│   │   ├── answerRoutes.js        # Daily question, submit answer, calendar, recap, push
+│   │   └── chatRoutes.js          # Chat history fetch, chat image upload
+│   ├── sockets/
+│   │   └── socketHandler.js       # Room management, chat broadcast, push notifications
+│   ├── middleware/
+│   │   ├── rateLimiter.js         # General, strict, and suggestion rate limiters
+│   │   ├── logger.js              # Status‑coloured request/response logging
+│   │   └── upload.js              # Multer config (profile pictures, chat images)
+│   ├── cron/
+│   │   └── dailyDrop.js           # 9:00 AM question rotation + push broadcast
+│   ├── .env.example
+│   └── uploads/                   # User‑uploaded files (gitignored)
+├── hotseat-frontend/
+│   ├── src/
+│   │   ├── App.jsx                # Root layout, background layers, mouse tracking, WebSocket init
+│   │   ├── main.jsx               # ReactDOM entry + service worker registration
+│   │   ├── store/useStore.js      # Zustand global state
+│   │   ├── components/
+│   │   │   ├── BottomNav.jsx      # Fixed bottom tab bar
+│   │   │   ├── OrbField.jsx       # Canvas 2D physics particle system
+│   │   │   ├── AnimatedNumber.jsx # Spring‑driven odometer component
+│   │   │   ├── ErrorBoundary.jsx  # React error boundary
+│   │   │   └── Toast.jsx          # Auto‑dismiss notification
+│   │   ├── pages/
+│   │   │   ├── JoinPage.jsx       # Onboarding + account recovery
+│   │   │   ├── HubPage.jsx        # Group selection hub
+│   │   │   ├── HomePage.jsx       # Today's question + countdown + CTA
+│   │   │   ├── AnswerPage.jsx     # Answer submission (text / vote / choice / slider)
+│   │   │   ├── ResultsPage.jsx    # Answer feed + vote breakdown + live chat
+│   │   │   ├── ProfilePage.jsx    # User profile + group settings
+│   │   │   ├── ManageGroup.jsx    # Admin panel (kick, rename, leave)
+│   │   │   └── InfoPage.jsx       # Answer archive calendar + recaps
+│   │   ├── hooks/
+│   │   │   └── useTypingEffect.js # Typewriter animation hook
+│   │   ├── lib/utils.js           # Shared utilities
+│   │   ├── useSFX.js              # Sound effect playback hook
+│   │   ├── pushUtility.js         # Web push subscription client
+│   │   └── translations.js        # English / Italian i18n dictionary
+│   ├── public/
+│   │   ├── sw.js                  # Service worker (push notification handler)
+│   │   └── sounds/                # Compressed .mp3 SFX files
+│   ├── .env.example
+│   └── dist/                      # Vite production build (gitignored)
+├── .gitignore
+├── LICENSE
+└── README.md
+```
+
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- PostgreSQL 14+
-- npm 9+
+- **Node.js** 18+
+- **PostgreSQL** 14+
+- **npm** 9+
 
 ### 1. Clone & Install
 
 ```bash
-git clone <repo-url>
+git clone https://github.com/dobbyyv/Hotseat.git
 cd hotseat
 
 # Backend
@@ -120,30 +207,30 @@ CREATE USER hotseat_admin WITH PASSWORD 'your_password';
 GRANT ALL PRIVILEGES ON DATABASE hotseat_db TO hotseat_admin;
 ```
 
-Tables are created automatically on server start via the idempotent schema auto-patch in `config/db.js` (`initDatabase()`). All `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` and `CREATE TABLE IF NOT EXISTS` statements are safe to run on every restart.
+Tables are created automatically on server start via the idempotent schema auto‑patch in `config/db.js`. All `CREATE TABLE IF NOT EXISTS` and `ALTER TABLE … ADD COLUMN IF NOT EXISTS` statements are safe to run on every restart.
 
 ### 3. Seed Questions (Optional)
 
-The question bank must be populated manually via `psql` or a database GUI. The `questions` table expects:
+Populate the `questions` table via `psql` or a database GUI:
 
 | Column | Type | Description |
-|--------|------|-------------|
+|---|---|---|
 | `id` | SERIAL | Primary key |
 | `text` | TEXT | Question text (English) |
 | `text_it` | TEXT | Question text (Italian, optional) |
-| `ui_type` | VARCHAR | `text`, `slider`, `choice`, or `tag` |
+| `ui_type` | VARCHAR | `text`, `slider`, `choice`, `tag`, or `vote_member` |
 | `is_targeted` | BOOLEAN | If true, `{TARGET}` in text is replaced with a user's name |
-| `options` | JSONB | Array of strings for choice-type questions |
+| `options` | JSONB | Array of strings for choice‑type questions |
 | `category` | VARCHAR | Display label (optional) |
-| `is_active` | BOOLEAN | Automatically managed by the server |
-| `used_date` | DATE | Automatically managed by the server |
-| `injected_text` | TEXT | Automatically managed (final text with targets resolved) |
-| `injected_text_it` | TEXT | Automatically managed |
+| `is_active` | BOOLEAN | Managed automatically by the server |
+| `used_date` | DATE | Managed automatically by the server |
+| `injected_text` | TEXT | Managed automatically (targets resolved) |
+| `injected_text_it` | TEXT | Managed automatically (targets resolved) |
 
 ### 4. Run
 
 ```bash
-# Terminal 1 — Backend (port 5000)
+# Terminal 1 — Backend (default port 5000)
 cd hotseat-backend
 node server.js
 
@@ -157,8 +244,8 @@ npm run dev
 ```bash
 cd hotseat-frontend
 npm run build
-# Output goes to hotseat-frontend/dist/
-# The backend serves this folder as static files.
+# Output → hotseat-frontend/dist/
+# The backend serves this folder as static files — no separate web server needed.
 ```
 
 ## Environment Variables
@@ -166,69 +253,69 @@ npm run build
 ### Backend (`hotseat-backend/.env`)
 
 | Variable | Required | Description |
-|----------|----------|-------------|
+|---|---|---|
 | `DB_USER` | Yes | PostgreSQL username |
 | `DB_HOST` | Yes | PostgreSQL host |
 | `DB_NAME` | Yes | PostgreSQL database name |
 | `DB_PASSWORD` | Yes | PostgreSQL password |
-| `DB_PORT` | No | PostgreSQL port (default: 5432) |
+| `DB_PORT` | No | PostgreSQL port (default: `5432`) |
 | `VAPID_PUBLIC_KEY` | Yes | VAPID public key for web push |
 | `VAPID_PRIVATE_KEY` | Yes | VAPID private key for web push |
-| `VAPID_EMAIL` | Yes | Contact email for VAPID (mailto: format) |
+| `VAPID_EMAIL` | Yes | Contact email for VAPID (`mailto:` format) |
 | `CORS_ORIGIN` | Yes | Frontend origin (e.g. `https://hotseat.site`) |
-| `SERVER_PORT` | No | HTTP port (default: 5000) |
+| `SERVER_PORT` | No | HTTP port (default: `5000`) |
 
 ### Frontend (`hotseat-frontend/.env`)
 
 | Variable | Required | Description |
-|----------|----------|-------------|
+|---|---|---|
 | `VITE_SERVER_URL` | Yes | Backend API URL (no trailing slash) |
 | `VITE_GIPHY_KEY` | No | GIPHY API key for GIF search in chat |
 | `VITE_VAPID_PUBLIC_KEY` | No | Must match backend `VAPID_PUBLIC_KEY` for push notifications |
 
-## API Routes
+## API Reference
 
-All routes are prefixed with `/api/`. Rate-limited routes use stricter limits.
+All routes are prefixed with `/api/`. Rate‑limited endpoints use stricter limits.
 
 | Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| GET | `/api/daily-question` | No | Returns the currently active question |
-| POST | `/api/join` | No | Creates a user and joins/creates a group |
-| POST | `/api/join-group` | No | Adds an existing user to a group by code |
-| POST | `/api/create-group` | No | Creates a new group for an existing user |
-| GET | `/api/user-groups/:user_id` | No | Lists all groups a user belongs to |
-| POST | `/api/answer` | Member | Submits today's answer for a group |
-| GET | `/api/answers/:group_id/:question_id` | Member | Fetches answers for a group/question |
-| GET | `/api/chat/:group_id` | Member | Fetches today's chat messages |
-| POST | `/api/upload-pfp` | No | Uploads a profile picture (max 5 MB) |
-| POST | `/api/chat-image` | No | Uploads a chat image (max 10 MB) |
-| POST | `/api/leave-group` | No | Removes user from a group |
-| POST | `/api/update-group` | Member | Renames a group (broadcast via WS) |
-| POST | `/api/admin/kick-member` | Member | Removes a user from the group |
-| GET | `/api/group-members/:group_id` | Member | Lists all members of a group |
-| POST | `/api/set-password` | No | Sets a bcrypt-hashed recovery password |
-| POST | `/api/recover-account` | No | Recovers account by name + password |
-| POST | `/api/suggest-question` | No | Submits a suggested question (5/hr limit) |
-| POST | `/api/push/subscribe` | No | Stores a push notification subscription |
-| GET | `/api/calendar/:group_id` | Member | Lists dates with archived answers |
-| GET | `/api/calendar/:group_id/:date` | Member | Lists archived answers for a specific date |
-| GET | `/api/recap/:group_id/:period` | Member | Weekly/monthly recap stats |
+|---|---|---|---|
+| `GET` | `/api/daily-question` | — | Returns the currently active question |
+| `POST` | `/api/join` | — | Creates a user and joins/creates a group |
+| `POST` | `/api/join-group` | — | Adds an existing user to a group by code |
+| `POST` | `/api/create-group` | — | Creates a new group for an existing user |
+| `GET` | `/api/user-groups/:user_id` | — | Lists all groups a user belongs to |
+| `POST` | `/api/answer` | Member | Submits today's answer for a group |
+| `GET` | `/api/answers/:group_id/:question_id` | Member | Fetches answers for a group/question |
+| `GET` | `/api/chat/:group_id` | Member | Fetches today's chat messages |
+| `POST` | `/api/upload-pfp` | — | Uploads a profile picture (max 5 MB) |
+| `POST` | `/api/chat-image` | — | Uploads a chat image (max 10 MB) |
+| `POST` | `/api/leave-group` | — | Removes user from a group |
+| `POST` | `/api/update-group` | Member | Renames a group (broadcast via WebSocket) |
+| `POST` | `/api/admin/kick-member` | Member | Removes a user from the group |
+| `GET` | `/api/group-members/:group_id` | Member | Lists all members of a group |
+| `POST` | `/api/set-password` | — | Sets a bcrypt‑hashed recovery password |
+| `POST` | `/api/recover-account` | — | Recovers account by name + password |
+| `POST` | `/api/suggest-question` | — | Submits a suggested question (5/hr limit) |
+| `POST` | `/api/push/subscribe` | — | Stores a push notification subscription |
+| `GET` | `/api/calendar/:group_id` | Member | Lists dates with archived answers |
+| `GET` | `/api/calendar/:group_id/:date` | Member | Archived answers for a specific date |
+| `GET` | `/api/recap/:group_id/:period` | Member | Weekly/monthly recap stats |
 
 ## WebSocket Events
 
 | Event | Direction | Description |
-|-------|-----------|-------------|
+|---|---|---|
 | `join_room` | Client → Server | Joins a group room (validated against DB) |
 | `leave_room` | Client → Server | Leaves a group room |
-| `send_message` | Client → Server | Broadcasts a chat message to the room + persists to DB |
+| `send_message` | Client → Server | Broadcasts a chat message + persists to DB |
 | `receive_message` | Server → Client | Incoming chat message |
 | `typing_start` | Client → Server | Signals typing has begun |
 | `typing_end` | Client → Server | Signals typing has stopped |
 | `user_typing` | Server → Client | Another user is typing |
 | `user_stopped_typing` | Server → Client | Another user stopped typing |
 | `answer_submitted` | Server → Group | Notifies group that a new answer was submitted |
-| `group_name_updated` | Server → Group | Notifies group that the group name changed |
-| `user_kicked` | Server → Client | Notifies a user they were removed from the group |
+| `group_name_updated` | Server → Group | Group name changed |
+| `user_kicked` | Server → Client | User was removed from the group |
 
 ## Author
 
