@@ -63,9 +63,9 @@ export default function HubPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* HEADER */}
-      <div className="flex justify-between items-start mb-10">
+    <div className="h-full flex flex-col">
+      {/* HEADER — flex-shrink-0 */}
+      <div className="flex justify-between items-start mb-8 flex-shrink-0">
         <div className="flex items-center gap-4">
           <div className="w-14 h-14 rounded-full border-2 border-zinc-800 bg-zinc-900 flex items-center justify-center font-bold text-xl overflow-hidden flex-shrink-0">
             {user?.avatar_url ? <img src={`${import.meta.env.VITE_SERVER_URL}${user.avatar_url}`} className="w-full h-full object-cover" alt="pfp" /> : <span className="text-white">{user?.avatar_text}</span>}
@@ -85,52 +85,57 @@ export default function HubPage() {
         </div>
       </div>
 
-      {/* GROUPS */}
-      <div className="space-y-4">
-        <h2 className="text-xs text-zinc-500 font-bold uppercase tracking-widest pl-2">{dict.yourGroups}</h2>
+      {/* Scrollable groups list — clears the floating nav pill */}
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-32">
 
-        <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-3">
-          {Array.isArray(userGroups) && userGroups.map((g) => {
-            const isLastActive = lastActiveGroup?.id === g.id
-            return (
-              <motion.div
-                key={g.id}
-                variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
-                transition={cardSpring}
-                whileHover={{ scale: 1.01, y: -2 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={() => handleEnterGroup(g)}
-                className={`relative overflow-hidden rounded-2xl p-6 cursor-pointer transition-all border ${
-                  isLastActive
-                    ? 'bg-zinc-800/80 border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.05)]'
-                    : 'bg-zinc-900/40 border-white/10 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.3)]'
-                }`}
-              >
-                {isLastActive && (
-                  <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-l from-white/10 to-transparent text-white text-[10px] font-bold uppercase tracking-widest rounded-bl-xl">
-                    {dict.lastActive}
-                  </div>
-                )}
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className={`text-2xl font-display font-bold pr-16 ${isLastActive ? 'text-white' : 'text-zinc-200'}`}>{g.name || 'Unnamed Group'}</h3>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isLastActive ? 'bg-white text-black' : 'bg-white/10 text-zinc-400 group-hover:text-white'}`}>
-                    <ChevronRight size={18} />
-                  </div>
-                </div>
-                <div className="flex gap-4 text-xs font-bold uppercase tracking-wide font-mono text-zinc-500">
-                  <span className="flex items-center gap-1.5"><Users size={14} /> {g.member_count} {dict.members}</span>
-                  {g.todays_answers > 0 && <span className="flex items-center gap-1.5 text-orange-400"><Sparkles size={14} /> {g.todays_answers} {dict.answered}</span>}
-                </div>
-              </motion.div>
-            )
-          })}
-        </motion.div>
+        <div className="space-y-4">
+          <h2 className="text-xs text-zinc-500 font-bold uppercase tracking-widest pl-2">{dict.yourGroups}</h2>
 
-        <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={() => { playSFX('woosh'); setShowJoinModal(true) }} className="w-full mt-4 border-2 border-dashed border-zinc-800 rounded-2xl p-6 flex items-center justify-center gap-3 text-zinc-500 hover:text-white hover:border-white/20 hover:bg-zinc-800/30 transition-all">
-          <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-300"><Plus size={18} strokeWidth={3} /></div>
-          <span className="font-bold tracking-wide">{dict.joinCreate}</span>
-        </motion.button>
+          <motion.div variants={stagger} initial="hidden" animate="show" className="space-y-3">
+            {Array.isArray(userGroups) && userGroups.map((g) => {
+              const isLastActive = lastActiveGroup?.id === g.id
+              return (
+                <motion.div
+                  key={g.id}
+                  variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}
+                  transition={cardSpring}
+                  whileHover={{ scale: 1.01, y: -2 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => handleEnterGroup(g)}
+                  className={`relative overflow-hidden rounded-2xl p-6 cursor-pointer transition-all border ${
+                    isLastActive
+                      ? 'bg-zinc-800/80 border-white/20 shadow-[0_0_30px_rgba(255,255,255,0.05)]'
+                      : 'bg-zinc-900/40 border-white/10 backdrop-blur-xl shadow-[0_4px_24px_rgba(0,0,0,0.3)]'
+                  }`}
+                >
+                  {isLastActive && (
+                    <div className="absolute top-0 right-0 px-4 py-1.5 bg-gradient-to-l from-white/10 to-transparent text-white text-[10px] font-bold uppercase tracking-widest rounded-bl-xl">
+                      {dict.lastActive}
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className={`text-2xl font-display font-bold pr-16 ${isLastActive ? 'text-white' : 'text-zinc-200'}`}>{g.name || 'Unnamed Group'}</h3>
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${isLastActive ? 'bg-white text-black' : 'bg-white/10 text-zinc-400 group-hover:text-white'}`}>
+                      <ChevronRight size={18} />
+                    </div>
+                  </div>
+                  <div className="flex gap-4 text-xs font-bold uppercase tracking-wide font-mono text-zinc-500">
+                    <span className="flex items-center gap-1.5"><Users size={14} /> {g.member_count} {dict.members}</span>
+                    {g.todays_answers > 0 && <span className="flex items-center gap-1.5 text-orange-400"><Sparkles size={14} /> {g.todays_answers} {dict.answered}</span>}
+                  </div>
+                </motion.div>
+              )
+            })}
+          </motion.div>
+
+          <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.98 }} onClick={() => { playSFX('woosh'); setShowJoinModal(true) }} className="w-full mt-4 border-2 border-dashed border-zinc-800 rounded-2xl p-6 flex items-center justify-center gap-3 text-zinc-500 hover:text-white hover:border-white/20 hover:bg-zinc-800/30 transition-all">
+            <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-zinc-300"><Plus size={18} strokeWidth={3} /></div>
+            <span className="font-bold tracking-wide">{dict.joinCreate}</span>
+          </motion.button>
+        </div>
+
       </div>
+      {/* end scrollable groups list */}
 
       {/* Join / Create Modal */}
       <AnimatePresence>
@@ -186,4 +191,3 @@ export default function HubPage() {
     </div>
   )
 }
-
