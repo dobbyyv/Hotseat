@@ -129,8 +129,8 @@ function App() {
         </div>
       </main>
 
-      {/* Bottom navigation — fixed floating overlay, outside the document flow */}
-      <BottomNav />
+      {/* Bottom navigation — only visible when user is authenticated */}
+      {hasIdentity && <BottomNav />}
     </BrowserRouter>
   )
 }
