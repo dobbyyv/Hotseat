@@ -60,6 +60,8 @@ function App() {
   const spotlightRef = useRef(null)
 
   useEffect(() => {
+    if (window.matchMedia('(hover: none)').matches) return
+
     const el = spotlightRef.current
     if (!el) return
 
@@ -122,7 +124,7 @@ function App() {
         {/* Spotlight grid — static background, CSS variable‑driven radial mask */}
         <div
           ref={spotlightRef}
-          className="fixed inset-0 z-[5] pointer-events-none"
+          className="fixed inset-0 z-[5] pointer-events-none max-md:hidden"
           style={{
             backgroundImage:
               'linear-gradient(to right, rgba(249,250,251,0.04) 1px, transparent 1px), ' +
@@ -134,7 +136,7 @@ function App() {
         />
 
         {/* Cursor torch — soft ambient glow via blur filter */}
-        <div className="fixed inset-0 z-[5] pointer-events-none" style={{ filter: 'blur(50px)' }}>
+        <div className="fixed inset-0 z-[5] pointer-events-none max-md:hidden" style={{ filter: 'blur(50px)' }}>
           <div
             className="absolute inset-0"
             style={{
