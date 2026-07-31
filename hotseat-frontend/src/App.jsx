@@ -142,8 +142,8 @@ function App() {
               'repeating-linear-gradient(to bottom, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px), ' +
               'repeating-linear-gradient(to right, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px), ' +
               'repeating-linear-gradient(to bottom, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px)',
-            maskImage: 'radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)',
+            maskImage: 'radial-gradient(150px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, rgba(0,0,0,0.4) 40%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(150px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, rgba(0,0,0,0.4) 40%, transparent 100%)',
           }}
         />
 

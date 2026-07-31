@@ -12,6 +12,10 @@ const DAMPING = 0.997
 const WALL_DAMPING = 0.7
 const MAX_FLING = 6
 const MAX_GLOW_RADIUS = 24
+const FLING_FACTOR = 1.5
+
+let lastMouseX = 0
+let lastMouseY = 0
 
 export default function OrbField() {
   const canvasRef = useRef(null)
@@ -139,6 +143,10 @@ export default function OrbField() {
       const rect = canvas.getBoundingClientRect()
       const x = mouse.clientX - rect.left
       const y = mouse.clientY - rect.top
+      dragging.dx = x - lastMouseX
+      dragging.dy = y - lastMouseY
+      lastMouseX = x
+      lastMouseY = y
       const o = orbs[dragging.index]
       o.x = x + dragging.offsetX
       o.y = y + dragging.offsetY
@@ -223,10 +231,20 @@ export default function OrbField() {
     dragRef.current = null
     const o = orbsRef.current[dragging.index]
     if (o) {
-      const speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy)
-      if (speed < 0.3) {
-        o.vx = (Math.random() - 0.5) * MIN_SPEED
-        o.vy = (Math.random() - 0.5) * MIN_SPEED
+      const flingVx = (dragging.dx || 0) * FLING_FACTOR
+      const flingVy = (dragging.dy || 0) * FLING_FACTOR
+      const speed = Math.sqrt(flingVx * flingVx + flingVy * flingVy)
+      if (speed > 0.3) {
+        o.vx = flingVx
+        o.vy = flingVy
+        const max = 16
+        if (speed > max) {
+          o.vx = (o.vx / speed) * max
+          o.vy = (o.vy / speed) * max
+        }
+      } else {
+        if (Math.abs(o.vx) < MIN_SPEED * 0.5) o.vx = (Math.random() - 0.5) * MIN_SPEED
+        if (Math.abs(o.vy) < MIN_SPEED * 0.5) o.vy = (Math.random() - 0.5) * MIN_SPEED
       }
     }
   }, [])

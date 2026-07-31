@@ -43,6 +43,7 @@ export default function ProfilePage() {
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
 
+  useEffect(() => { playSFX('woosh') }, [playSFX])
   useEffect(() => { if (!user) navigate('/') }, [user, navigate])
   useEffect(() => { if (group) setEditName(group.name) }, [group])
 
