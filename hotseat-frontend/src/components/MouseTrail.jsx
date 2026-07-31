@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { mouse } from '../lib/mousePosition'
 
-const TRAIL_LENGTH = 30
+const MAX_POINTS = 16
 
 export default function MouseTrail() {
   const canvasRef = useRef(null)
@@ -43,45 +43,37 @@ export default function MouseTrail() {
 
       for (let i = pts.length - 1; i >= 0; i--) {
         const p = pts[i]
-        p.life -= 0.03
+        p.life -= 0.07
         if (p.life <= 0) {
           pts.splice(i, 1)
-          continue
         }
-        p.x += (Math.random() - 0.5) * 0.6
-        p.y += (Math.random() - 0.5) * 0.6
+      }
+
+      if (pts.length > MAX_POINTS) {
+        pts.splice(0, pts.length - MAX_POINTS)
       }
 
       if (pts.length > 1) {
         for (let i = 1; i < pts.length; i++) {
           const prev = pts[i - 1]
           const curr = pts[i]
-          const alpha = curr.life * 0.4
-          const width = curr.life * 2.5
+          const midX = (prev.x + curr.x) / 2
+          const midY = (prev.y + curr.y) / 2
+          const alpha = curr.life * 0.45
+          const width = curr.life * 4
 
           ctx.beginPath()
           ctx.moveTo(prev.x, prev.y)
-          ctx.lineTo(curr.x, curr.y)
-          ctx.strokeStyle = `rgba(180, 180, 190, ${alpha})`
+          ctx.quadraticCurveTo(prev.x, prev.y, midX, midY)
+          ctx.strokeStyle = `rgba(170, 170, 190, ${alpha})`
           ctx.lineWidth = width
           ctx.lineCap = 'round'
           ctx.lineJoin = 'round'
-          ctx.shadowColor = `rgba(200, 200, 210, ${alpha * 0.6})`
-          ctx.shadowBlur = 8
+          ctx.shadowColor = `rgba(190, 190, 210, ${alpha * 0.5})`
+          ctx.shadowBlur = 6
           ctx.stroke()
         }
 
-        ctx.shadowColor = 'transparent'
-        ctx.shadowBlur = 0
-
-        const head = pts[pts.length - 1]
-        const headAlpha = head.life * 0.55
-        ctx.beginPath()
-        ctx.arc(head.x, head.y, head.life * 3, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(210, 210, 220, ${headAlpha})`
-        ctx.shadowColor = `rgba(220, 220, 235, ${headAlpha * 0.5})`
-        ctx.shadowBlur = 10
-        ctx.fill()
         ctx.shadowColor = 'transparent'
         ctx.shadowBlur = 0
       }

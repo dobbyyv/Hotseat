@@ -124,6 +124,26 @@ export default function OrbField() {
 
       o.vx *= DAMPING
       o.vy *= DAMPING
+
+      const mx = mouse.clientX
+      const my = mouse.clientY
+      if (mx > 0 && my > 0) {
+        const rect = canvas.getBoundingClientRect()
+        const cmx = mx - rect.left
+        const cmy = my - rect.top
+        const dx = o.x - cmx
+        const dy = o.y - cmy
+        const distSq = dx * dx + dy * dy
+        const repulsionRadius = 80
+        if (distSq < repulsionRadius * repulsionRadius && distSq > 0.1) {
+          const dist = Math.sqrt(distSq)
+          const force = (repulsionRadius - dist) / repulsionRadius
+          const strength = force * force * 4
+          o.vx += (dx / dist) * strength
+          o.vy += (dy / dist) * strength
+        }
+      }
+
       if (Math.abs(o.vx) < MIN_SPEED * 0.1) o.vx = (Math.random() - 0.5) * MIN_SPEED
       if (Math.abs(o.vy) < MIN_SPEED * 0.1) o.vy = (Math.random() - 0.5) * MIN_SPEED
 
