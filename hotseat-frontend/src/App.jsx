@@ -16,6 +16,7 @@ import ManageGroup from './pages/ManageGroup'
 import InfoPage from './pages/InfoPage'
 
 import useStore from './store/useStore'
+import { mouse } from './lib/mousePosition'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
@@ -65,15 +66,25 @@ function App() {
     const el = spotlightRef.current
     if (!el) return
 
+    let raf = null
+    const tick = () => {
+      el.style.setProperty('--mouse-x', `${mouse.clientX}px`)
+      el.style.setProperty('--mouse-y', `${mouse.clientY}px`)
+      raf = requestAnimationFrame(tick)
+    }
     const onMove = (e) => {
-      el.style.setProperty('--mouse-x', `${e.clientX}px`)
-      el.style.setProperty('--mouse-y', `${e.clientY}px`)
+      mouse.clientX = e.clientX
+      mouse.clientY = e.clientY
     }
 
     el.style.setProperty('--mouse-x', '50%')
     el.style.setProperty('--mouse-y', '50%')
+    raf = requestAnimationFrame(tick)
     window.addEventListener('pointermove', onMove, { passive: true })
-    return () => window.removeEventListener('pointermove', onMove)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      if (raf) cancelAnimationFrame(raf)
+    }
   }, [])
 
   useEffect(() => {
@@ -121,17 +132,18 @@ function App() {
         {/* Interactive physics orbs */}
         <OrbField />
 
-        {/* Spotlight grid — static background, CSS variable‑driven radial mask */}
+        {/* Blueprint grid — static dual-layer repeating gradient, GPU-composited radial mask */}
         <div
           ref={spotlightRef}
           className="fixed inset-0 z-[5] pointer-events-none max-md:hidden"
           style={{
             backgroundImage:
-              'linear-gradient(to right, rgba(249,250,251,0.04) 1px, transparent 1px), ' +
-              'linear-gradient(to bottom, rgba(249,250,251,0.04) 1px, transparent 1px)',
-            backgroundSize: '18px 18px',
-            maskImage: 'radial-gradient(120px circle at var(--mouse-x) var(--mouse-y), rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(120px circle at var(--mouse-x) var(--mouse-y), rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
+              'repeating-linear-gradient(to right, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px), ' +
+              'repeating-linear-gradient(to bottom, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px), ' +
+              'repeating-linear-gradient(to right, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px), ' +
+              'repeating-linear-gradient(to bottom, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px)',
+            maskImage: 'radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)',
           }}
         />
 

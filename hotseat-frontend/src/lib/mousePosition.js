@@ -1,0 +1,1 @@
+export const mouse = { clientX: 0, clientY: 0 }

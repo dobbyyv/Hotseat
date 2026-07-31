@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
+import { mouse } from '../lib/mousePosition'
 
 const ORB_COUNT = 48
 const MIN_RADIUS = 3
@@ -134,6 +135,19 @@ export default function OrbField() {
       }
     }
 
+    if (dragging) {
+      const rect = canvas.getBoundingClientRect()
+      const x = mouse.clientX - rect.left
+      const y = mouse.clientY - rect.top
+      const o = orbs[dragging.index]
+      o.x = x + dragging.offsetX
+      o.y = y + dragging.offsetY
+      if (o.x < o.r) o.x = o.r
+      if (o.x > w - o.r) o.x = w - o.r
+      if (o.y < o.r) o.y = o.r
+      if (o.y > h - o.r) o.y = h - o.r
+    }
+
     for (const o of orbs) {
       const isDragged = dragging && orbs.indexOf(o) === dragging.index
 
@@ -171,13 +185,11 @@ export default function OrbField() {
     animRef.current = requestAnimationFrame(loop)
   }, [])
 
-  const getCoords = useCallback((e) => {
+  const canvasCoords = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return { x: 0, y: 0 }
     const rect = canvas.getBoundingClientRect()
-    const clientX = e.touches ? e.touches[0]?.clientX ?? e.changedTouches[0]?.clientX : e.clientX
-    const clientY = e.touches ? e.touches[0]?.clientY ?? e.changedTouches[0]?.clientY : e.clientY
-    return { x: clientX - rect.left, y: clientY - rect.top }
+    return { x: mouse.clientX - rect.left, y: mouse.clientY - rect.top }
   }, [])
 
   const findOrbAt = useCallback((px, py) => {
@@ -193,7 +205,7 @@ export default function OrbField() {
 
   const handlePointerDown = useCallback((e) => {
     e.preventDefault()
-    const { x, y } = getCoords(e)
+    const { x, y } = canvasCoords()
     const idx = findOrbAt(x, y)
     if (idx === -1) return
     const o = orbsRef.current[idx]
@@ -201,53 +213,23 @@ export default function OrbField() {
       index: idx,
       offsetX: o.x - x,
       offsetY: o.y - y,
-      trail: [{ x, y, t: performance.now() }],
+      trail: [],
     }
-  }, [getCoords, findOrbAt])
+  }, [canvasCoords, findOrbAt])
 
-  const handlePointerMove = useCallback((e) => {
-    e.preventDefault()
+  const handlePointerUp = useCallback(() => {
     const dragging = dragRef.current
     if (!dragging) return
-    const { x, y } = getCoords(e)
+    dragRef.current = null
     const o = orbsRef.current[dragging.index]
-    o.x = x + dragging.offsetX
-    o.y = y + dragging.offsetY
-    const { w, h } = dimsRef.current
-    if (o.x < o.r) o.x = o.r
-    if (o.x > w - o.r) o.x = w - o.r
-    if (o.y < o.r) o.y = o.r
-    if (o.y > h - o.r) o.y = h - o.r
-    const now = performance.now()
-    dragging.trail.push({ x, y, t: now })
-    if (dragging.trail.length > 5) dragging.trail.shift()
-  }, [getCoords])
-
-  const handlePointerUp = useCallback((e) => {
-    e.preventDefault()
-    const dragging = dragRef.current
-    if (!dragging) return
-    const { x, y } = getCoords(e)
-    const trail = dragging.trail
-    if (trail.length >= 2) {
-      const first = trail[0]
-      const last = trail[trail.length - 1]
-      const dt = (last.t - first.t) / 1000
-      if (dt > 0.01) {
-        const dx = last.x - first.x
-        const dy = last.y - first.y
-        const o = orbsRef.current[dragging.index]
-        o.vx = (dx / dt) * 0.06
-        o.vy = (dy / dt) * 0.06
-        const speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy)
-        if (speed > 8) {
-          o.vx = (o.vx / speed) * 8
-          o.vy = (o.vy / speed) * 8
-        }
+    if (o) {
+      const speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy)
+      if (speed < 0.3) {
+        o.vx = (Math.random() - 0.5) * MIN_SPEED
+        o.vy = (Math.random() - 0.5) * MIN_SPEED
       }
     }
-    dragRef.current = null
-  }, [getCoords])
+  }, [])
 
   useEffect(() => {
     resize()
@@ -262,10 +244,8 @@ export default function OrbField() {
 
     if (!isTouchDevice) {
       canvas.addEventListener('mousedown', handlePointerDown)
-      window.addEventListener('mousemove', handlePointerMove)
       window.addEventListener('mouseup', handlePointerUp)
       canvas.addEventListener('touchstart', handlePointerDown, { passive: false })
-      window.addEventListener('touchmove', handlePointerMove, { passive: false })
       window.addEventListener('touchend', handlePointerUp)
     }
 
@@ -274,14 +254,12 @@ export default function OrbField() {
       window.removeEventListener('resize', resize)
       if (!isTouchDevice) {
         canvas.removeEventListener('mousedown', handlePointerDown)
-        window.removeEventListener('mousemove', handlePointerMove)
         window.removeEventListener('mouseup', handlePointerUp)
         canvas.removeEventListener('touchstart', handlePointerDown)
-        window.removeEventListener('touchmove', handlePointerMove)
         window.removeEventListener('touchend', handlePointerUp)
       }
     }
-  }, [resize, spawnOrbs, loop, handlePointerDown, handlePointerMove, handlePointerUp])
+  }, [resize, spawnOrbs, loop, handlePointerDown, handlePointerUp])
 
   return (
     <>
