@@ -52,7 +52,7 @@ export default function AnswerPage() {
     if (type === 'choice') return selected !== null
     if (type === 'slider') return true
     if (type === 'vote_member' || type === 'tag') return taggedFriend !== null
-    return answer.trim().length > 0
+    return answer.trim().length >= 3
   }
 
   return (
