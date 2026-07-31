@@ -88,7 +88,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Scrollable content — fills remaining space */}
-      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-8 pb-4">
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar space-y-8 pb-32">
 
         {/* Avatar & Username */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="flex flex-col items-center w-full">

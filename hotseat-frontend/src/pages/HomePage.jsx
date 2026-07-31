@@ -121,9 +121,9 @@ export default function HomePage() {
   const activeQuestionText = currentQuestion[`text_${lang}`] || currentQuestion.text
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+    <div className="h-full flex flex-col">
+      {/* Header — flex-shrink-0 */}
+      <div className="flex items-center justify-between mb-6 flex-shrink-0">
         <div>
           <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-1">{text.todaysDrop}</p>
           <h2 className="text-zinc-200 font-bold text-lg">{group?.name}</h2>
@@ -138,6 +138,9 @@ export default function HomePage() {
           </motion.div>
         </div>
       </div>
+
+      {/* Scrollable content — clears the floating nav pill */}
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-32">
 
       {/* Question Card */}
       <motion.div
@@ -214,6 +217,9 @@ export default function HomePage() {
           <Lightbulb size={15} /> {suggestText.suggestBtn}
         </motion.button>
       </div>
+
+      </div>
+      {/* end scrollable content */}
 
       {/* Suggest Modal */}
       <AnimatePresence>

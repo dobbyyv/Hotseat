@@ -123,14 +123,14 @@ function App() {
           <rect width="100%" height="100%" filter="url(#noise)" />
         </svg>
 
-        {/* Foreground container — fills remaining space in flex stack */}
+        {/* Foreground container — fills the entire 100dvh, BottomNav floats on top */}
         <div className="relative z-10 w-full max-w-4xl mx-auto px-6 pt-6 pb-2 md:px-12 md:pt-12 md:pb-3 flex-1 min-h-0 overflow-hidden">
           <AnimatedRoutes />
         </div>
-
-        {/* Bottom navigation — native to the flex stack, no fixed positioning */}
-        <BottomNav />
       </main>
+
+      {/* Bottom navigation — fixed floating overlay, outside the document flow */}
+      <BottomNav />
     </BrowserRouter>
   )
 }

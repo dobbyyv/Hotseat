@@ -124,23 +124,30 @@ export default function InfoPage() {
   const { group, lang } = useStore(); const [tab, setTab] = useState('calendar'); const playSFX = useSFX()
   useEffect(() => { playSFX('woosh') }, [playSFX])
   return (
-    <div className="min-h-screen flex flex-col">
-      <div className="mb-8">
-        <p className="text-zinc-500 text-[10px] uppercase tracking-widest mb-1.5 font-bold flex items-center gap-2"><BarChart2 size={14} /> Group Data</p>
-        <h2 className="text-white font-black font-display text-3xl tracking-tight">{group?.name || 'The Crew'}</h2>
-      </div>
-      <div className="mb-6">
-        <div className="flex gap-2 bg-zinc-900/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5">
-          {[['calendar', <><CalendarDays size={16} /> Vault</>], ['recap', <><BarChart2 size={16} /> Recap</>]].map(([id, label]) => (
-            <motion.button key={id} whileTap={{ scale: 0.95 }} onClick={() => { playSFX('click'); setTab(id) }}
-              className={`flex-1 py-3 rounded-xl text-sm font-bold font-display transition-all flex items-center justify-center gap-2 ${tab === id ? 'bg-white text-black' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}>{label}</motion.button>
-          ))}
+    <div className="h-full flex flex-col">
+      {/* Fixed header area */}
+      <div className="flex-shrink-0">
+        <div className="mb-6">
+          <p className="text-zinc-500 text-[10px] uppercase tracking-widest mb-1.5 font-bold flex items-center gap-2"><BarChart2 size={14} /> Group Data</p>
+          <h2 className="text-white font-black font-display text-3xl tracking-tight">{group?.name || 'The Crew'}</h2>
+        </div>
+        <div className="mb-4">
+          <div className="flex gap-2 bg-zinc-900/60 backdrop-blur-2xl border border-white/10 rounded-2xl p-1.5">
+            {[['calendar', <><CalendarDays size={16} /> Vault</>], ['recap', <><BarChart2 size={16} /> Recap</>]].map(([id, label]) => (
+              <motion.button key={id} whileTap={{ scale: 0.95 }} onClick={() => { playSFX('click'); setTab(id) }}
+                className={`flex-1 py-3 rounded-xl text-sm font-bold font-display transition-all flex items-center justify-center gap-2 ${tab === id ? 'bg-white text-black' : 'text-zinc-500 hover:text-white hover:bg-white/5'}`}>{label}</motion.button>
+            ))}
+          </div>
         </div>
       </div>
-      <AnimatePresence mode="wait">
-        {tab === 'calendar' && <motion.div key="cal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2, ease: "easeOut" }}><CalendarTab groupId={group?.id} lang={lang || 'en'} /></motion.div>}
-        {tab === 'recap' && <motion.div key="recap" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2, ease: "easeOut" }}><RecapTab groupId={group?.id} /></motion.div>}
-      </AnimatePresence>
+
+      {/* Scrollable content — clears the floating nav pill */}
+      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-32">
+        <AnimatePresence mode="wait">
+          {tab === 'calendar' && <motion.div key="cal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2, ease: "easeOut" }}><CalendarTab groupId={group?.id} lang={lang || 'en'} /></motion.div>}
+          {tab === 'recap' && <motion.div key="recap" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2, ease: "easeOut" }}><RecapTab groupId={group?.id} /></motion.div>}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
