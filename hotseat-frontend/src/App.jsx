@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { io } from 'socket.io-client'
 
 import BottomNav from './components/BottomNav'
 import OrbField from './components/OrbField'
+import MouseTrail from './components/MouseTrail'
 
 import JoinPage from './pages/JoinPage'
 import HubPage from './pages/HubPage'
@@ -58,33 +59,14 @@ function App() {
   const hasIdentity = !!user;
   const isFullyAuthenticated = hasIdentity && !!activeGroup;
 
-  const spotlightRef = useRef(null)
-
   useEffect(() => {
     if (window.matchMedia('(hover: none)').matches) return
-
-    const el = spotlightRef.current
-    if (!el) return
-
-    let raf = null
-    const tick = () => {
-      el.style.setProperty('--mouse-x', `${mouse.clientX}px`)
-      el.style.setProperty('--mouse-y', `${mouse.clientY}px`)
-      raf = requestAnimationFrame(tick)
-    }
     const onMove = (e) => {
       mouse.clientX = e.clientX
       mouse.clientY = e.clientY
     }
-
-    el.style.setProperty('--mouse-x', '50%')
-    el.style.setProperty('--mouse-y', '50%')
-    raf = requestAnimationFrame(tick)
     window.addEventListener('pointermove', onMove, { passive: true })
-    return () => {
-      window.removeEventListener('pointermove', onMove)
-      if (raf) cancelAnimationFrame(raf)
-    }
+    return () => window.removeEventListener('pointermove', onMove)
   }, [])
 
   useEffect(() => {
@@ -115,13 +97,7 @@ function App() {
 
   return (
     <BrowserRouter>
-      <main
-        className="relative h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans select-none"
-        style={{
-          '--mouse-x': '50%',
-          '--mouse-y': '50%',
-        }}
-      >
+      <main className="relative h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans select-none">
         {/* Ambient depth orbs */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
           <div className="absolute top-[-20%] left-[-10%] w-[60vw] h-[60vw] rounded-full bg-zinc-800/12 blur-[160px] pointer-events-none" />
@@ -132,30 +108,8 @@ function App() {
         {/* Interactive physics orbs */}
         <OrbField />
 
-        {/* Blueprint grid — static dual-layer repeating gradient, GPU-composited radial mask */}
-        <div
-          ref={spotlightRef}
-          className="fixed inset-0 z-[5] pointer-events-none max-md:hidden"
-          style={{
-            backgroundImage:
-              'repeating-linear-gradient(to right, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px), ' +
-              'repeating-linear-gradient(to bottom, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 1px, transparent 1px, transparent 10px), ' +
-              'repeating-linear-gradient(to right, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px), ' +
-              'repeating-linear-gradient(to bottom, rgba(255,255,255,0.08) 0px, rgba(255,255,255,0.08) 1px, transparent 1px, transparent 40px)',
-            maskImage: 'radial-gradient(150px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, rgba(0,0,0,0.4) 40%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(150px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, rgba(0,0,0,0.4) 40%, transparent 100%)',
-          }}
-        />
-
-        {/* Cursor torch — soft ambient glow via blur filter */}
-        <div className="fixed inset-0 z-[5] pointer-events-none max-md:hidden" style={{ filter: 'blur(50px)' }}>
-          <div
-            className="absolute inset-0"
-            style={{
-              background: 'radial-gradient(140px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.09), transparent 80%)',
-            }}
-          />
-        </div>
+        {/* Mouse trail — canvas-based falling star */}
+        <MouseTrail />
 
         {/* Film grain */}
         <svg
