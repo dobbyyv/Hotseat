@@ -53,37 +53,25 @@ function AnimatedRoutes() {
 
 function App() {
   const { user, group: activeGroup } = useStore()
-  
+
   const hasIdentity = !!user;
   const isFullyAuthenticated = hasIdentity && !!activeGroup;
 
-  const gridRef = useRef(null)
-  const torchRef = useRef(null)
-  const posRef = useRef({ x: 0, y: 0 })
+  const spotlightRef = useRef(null)
 
   useEffect(() => {
-    const grid = gridRef.current
-    const torch = torchRef.current
-    if (!grid || !torch) return
+    const el = spotlightRef.current
+    if (!el) return
 
-    let raf = null
-    const tick = () => {
-      const p = posRef.current
-      const x = p.x - 120
-      const y = p.y - 120
-      grid.style.transform = `translate3d(${x}px, ${y}px, 0)`
-      torch.style.transform = `translate3d(${x}px, ${y}px, 0)`
-      raf = requestAnimationFrame(tick)
-    }
     const onMove = (e) => {
-      posRef.current = { x: e.clientX, y: e.clientY }
+      el.style.setProperty('--mouse-x', `${e.clientX}px`)
+      el.style.setProperty('--mouse-y', `${e.clientY}px`)
     }
-    raf = requestAnimationFrame(tick)
-    window.addEventListener('mousemove', onMove, { passive: true })
-    return () => {
-      window.removeEventListener('mousemove', onMove)
-      if (raf) cancelAnimationFrame(raf)
-    }
+
+    el.style.setProperty('--mouse-x', '50%')
+    el.style.setProperty('--mouse-y', '50%')
+    window.addEventListener('pointermove', onMove, { passive: true })
+    return () => window.removeEventListener('pointermove', onMove)
   }, [])
 
   useEffect(() => {
@@ -116,6 +104,10 @@ function App() {
     <BrowserRouter>
       <main
         className="relative h-screen w-full bg-[#050508] text-zinc-50 overflow-hidden font-sans select-none"
+        style={{
+          '--mouse-x': '50%',
+          '--mouse-y': '50%',
+        }}
       >
         {/* Ambient depth orbs */}
         <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
@@ -127,36 +119,29 @@ function App() {
         {/* Interactive physics orbs */}
         <OrbField />
 
-        {/* Spotlight grid — 120px radius, GPU-composited via translate3d */}
+        {/* Spotlight grid — static background, CSS variable‑driven radial mask */}
         <div
-          ref={gridRef}
-          className="fixed pointer-events-none z-[5]"
+          ref={spotlightRef}
+          className="fixed inset-0 z-[5] pointer-events-none"
           style={{
-            width: '240px',
-            height: '240px',
-            borderRadius: '50%',
-            willChange: 'transform',
             backgroundImage:
               'linear-gradient(to right, rgba(249,250,251,0.04) 1px, transparent 1px), ' +
               'linear-gradient(to bottom, rgba(249,250,251,0.04) 1px, transparent 1px)',
             backgroundSize: '18px 18px',
-            maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,0.4) 70%, transparent 100%)',
-            WebkitMaskImage: 'radial-gradient(circle, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 40%, rgba(0,0,0,0.4) 70%, transparent 100%)',
+            maskImage: 'radial-gradient(120px circle at var(--mouse-x) var(--mouse-y), rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(120px circle at var(--mouse-x) var(--mouse-y), rgba(0,0,0,1) 0%, rgba(0,0,0,0.5) 50%, transparent 100%)',
           }}
         />
 
-        {/* Cursor torch — 120px radius, GPU-composited via translate3d */}
-        <div
-          ref={torchRef}
-          className="fixed pointer-events-none z-[5]"
-          style={{
-            width: '240px',
-            height: '240px',
-            borderRadius: '50%',
-            willChange: 'transform',
-            background: 'radial-gradient(circle, rgba(255,255,255,0.08), transparent 80%)',
-          }}
-        />
+        {/* Cursor torch — soft ambient glow via blur filter */}
+        <div className="fixed inset-0 z-[5] pointer-events-none" style={{ filter: 'blur(50px)' }}>
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'radial-gradient(140px circle at var(--mouse-x) var(--mouse-y), rgba(255,255,255,0.09), transparent 80%)',
+            }}
+          />
+        </div>
 
         {/* Film grain */}
         <svg
