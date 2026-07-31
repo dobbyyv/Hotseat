@@ -10,25 +10,37 @@ const CORE_ALPHA = 0.18
 const DAMPING = 0.997
 const WALL_DAMPING = 0.7
 const MAX_FLING = 6
+const MAX_GLOW_RADIUS = 24
 
 export default function OrbField() {
   const canvasRef = useRef(null)
+  const glowRef = useRef(null)
   const orbsRef = useRef([])
   const animRef = useRef(null)
   const dragRef = useRef(null)
   const dimsRef = useRef({ w: 0, h: 0 })
 
   const resize = useCallback(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
     const dpr = window.devicePixelRatio || 1
     const w = window.innerWidth
     const h = window.innerHeight
-    canvas.width = w * dpr
-    canvas.height = h * dpr
-    canvas.style.width = `${w}px`
-    canvas.style.height = `${h}px`
     dimsRef.current = { w, h, dpr }
+
+    const base = canvasRef.current
+    if (base) {
+      base.width = w * dpr
+      base.height = h * dpr
+      base.style.width = `${w}px`
+      base.style.height = `${h}px`
+    }
+
+    const glow = glowRef.current
+    if (glow) {
+      glow.width = w * dpr
+      glow.height = h * dpr
+      glow.style.width = `${w}px`
+      glow.style.height = `${h}px`
+    }
   }, [])
 
   const spawnOrbs = useCallback(() => {
@@ -82,14 +94,19 @@ export default function OrbField() {
 
   const loop = useCallback(() => {
     const canvas = canvasRef.current
-    if (!canvas) return
+    const glowCanvas = glowRef.current
+    if (!canvas || !glowCanvas) return
     const ctx = canvas.getContext('2d')
+    const gctx = glowCanvas.getContext('2d')
     const { w, h, dpr } = dimsRef.current
     const orbs = orbsRef.current
     const dragging = dragRef.current
 
     ctx.clearRect(0, 0, w * dpr, h * dpr)
     ctx.scale(dpr, dpr)
+
+    gctx.clearRect(0, 0, w * dpr, h * dpr)
+    gctx.scale(dpr, dpr)
 
     for (let i = 0; i < orbs.length; i++) {
       if (dragging && dragging.index === i) continue
@@ -120,11 +137,6 @@ export default function OrbField() {
     for (const o of orbs) {
       const isDragged = dragging && orbs.indexOf(o) === dragging.index
 
-      // sub-surface glow via canvas shadowBlur — diffuses through translucent UI panels
-      ctx.save()
-      ctx.shadowColor = `hsla(${o.hue}, 60%, 80%, 0.55)`
-      ctx.shadowBlur = 22
-
       const glow = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r * 3)
       glow.addColorStop(0, `hsla(${o.hue}, 60%, 80%, ${GLOW_ALPHA})`)
       glow.addColorStop(0.5, `hsla(${o.hue}, 50%, 70%, ${GLOW_ALPHA * 0.3})`)
@@ -133,12 +145,6 @@ export default function OrbField() {
       ctx.beginPath()
       ctx.arc(o.x, o.y, o.r * 3, 0, Math.PI * 2)
       ctx.fill()
-
-      ctx.restore()
-
-      ctx.save()
-      ctx.shadowColor = `hsla(${o.hue}, 40%, 90%, 0.45)`
-      ctx.shadowBlur = 14
 
       const core = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r)
       core.addColorStop(0, `hsla(${o.hue}, 30%, 95%, ${isDragged ? 0.5 : CORE_ALPHA})`)
@@ -149,10 +155,19 @@ export default function OrbField() {
       ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2)
       ctx.fill()
 
-      ctx.restore()
+      const glowRadius = Math.min(o.r * 2.5, MAX_GLOW_RADIUS)
+      const surfaceGlow = gctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, glowRadius)
+      surfaceGlow.addColorStop(0, `hsla(${o.hue}, 55%, 85%, 0.18)`)
+      surfaceGlow.addColorStop(0.4, `hsla(${o.hue}, 50%, 80%, 0.08)`)
+      surfaceGlow.addColorStop(1, 'rgba(0, 0, 0, 0)')
+      gctx.fillStyle = surfaceGlow
+      gctx.beginPath()
+      gctx.arc(o.x, o.y, glowRadius, 0, Math.PI * 2)
+      gctx.fill()
     }
 
     ctx.setTransform(1, 0, 0, 1, 0, 0)
+    gctx.setTransform(1, 0, 0, 1, 0, 0)
     animRef.current = requestAnimationFrame(loop)
   }, [])
 
@@ -263,11 +278,19 @@ export default function OrbField() {
   }, [resize, spawnOrbs, loop, handlePointerDown, handlePointerMove, handlePointerUp])
 
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-auto"
-      style={{ touchAction: 'none' }}
-      aria-hidden="true"
-    />
+    <>
+      <canvas
+        ref={canvasRef}
+        className="fixed inset-0 z-0 pointer-events-auto"
+        style={{ touchAction: 'none' }}
+        aria-hidden="true"
+      />
+      <canvas
+        ref={glowRef}
+        className="fixed inset-0 z-50 pointer-events-none"
+        style={{ mixBlendMode: 'screen', touchAction: 'none' }}
+        aria-hidden="true"
+      />
+    </>
   )
 }
