@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react'
 import { mouse } from '../lib/mousePosition'
 
-const MAX_POINTS = 16
+const MAX_POINTS = 6
 
 export default function MouseTrail() {
   const canvasRef = useRef(null)
@@ -43,7 +43,7 @@ export default function MouseTrail() {
 
       for (let i = pts.length - 1; i >= 0; i--) {
         const p = pts[i]
-        p.life -= 0.07
+        p.life -= 0.14
         if (p.life <= 0) {
           pts.splice(i, 1)
         }
