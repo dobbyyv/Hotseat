@@ -5,12 +5,10 @@ const { uploadChat } = require('../middleware/upload');
 
 const router = express.Router();
 
-// GET /api/chat/:group_id — fetch today's chat messages (requires group membership)
 router.get('/chat/:group_id', async (req, res) => {
   const { group_id } = req.params;
   const userId = parseInt(req.query.user_id, 10);
 
-  // Verify group membership before serving chat data
   if (userId) {
     const memberCheck = await pool.query(
       "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
@@ -33,7 +31,6 @@ router.get('/chat/:group_id', async (req, res) => {
   }
 });
 
-// POST /api/chat-image — upload an image to the group chat
 router.post('/chat-image', strictLimiter, (req, res) => {
   uploadChat.single('image')(req, res, async (err) => {
     if (err) return res.status(400).json({ error: err.message });

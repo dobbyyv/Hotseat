@@ -5,26 +5,10 @@ const { broadcastToGroup } = require('../sockets/socketHandler');
 
 const router = express.Router();
 
-/**
- * Normalizes a question's ui_type to a canonical interaction type.
- *
- * Recognized canonical types:
- *   - 'text'       → open-ended text response (scenarios, creative writing)
- *   - 'vote_member' → select a group member (nominations, "who is most likely")
- *   - 'choice'     → pick from predefined options (this-or-that, A/B/C)
- *   - 'slider'     → 0–100 scale (confidence, agreement)
- *
- * Legacy aliases (mapped automatically):
- *   'tag' → 'vote_member'
- *   'open_ended', 'scenario' → 'text'
- *
- * If ui_type is null/undefined, the function infers the type from question
- * content using keyword heuristics as a last resort.
- */
+// maps legacy ui_type values and infers canonical type from question text
 function normalizeQuestionType(question) {
   const raw = (question.ui_type || '').toLowerCase().trim();
 
-  // Explicitly mapped legacy types
   const ALIAS_MAP = {
     'tag':          'vote_member',
     'vote':         'vote_member',
@@ -43,11 +27,9 @@ function normalizeQuestionType(question) {
 
   if (ALIAS_MAP[raw]) return ALIAS_MAP[raw];
 
-  // Inference fallback — only reached if ui_type is null/unknown
   const text = ((question.injected_text || question.text || '') + ' ' +
                 (question.injected_text_it || question.text_it || '')).toLowerCase();
 
-  // Heuristic: member-nomination patterns
   const nominationPatterns = [
     'who is most likely', 'who would be the first', 'chi è più probabile',
     'who would', 'which friend', 'pick a member', 'tag a friend',
@@ -58,7 +40,6 @@ function normalizeQuestionType(question) {
     return 'vote_member';
   }
 
-  // Heuristic: scale/slider patterns
   const scalePatterns = [
     'on a scale', 'how confident', 'da 1 a 10', 'su una scala',
     'rate your', 'valuta', 'from 0 to 100',
@@ -67,7 +48,6 @@ function normalizeQuestionType(question) {
     return 'slider';
   }
 
-  // Heuristic: choice patterns (this-or-that)
   const choicePatterns = [
     'this or that', 'would you rather', 'preferiresti',
     'a or b', 'pick one', 'scegli',
@@ -76,11 +56,9 @@ function normalizeQuestionType(question) {
     return 'choice';
   }
 
-  // Default: text (open-ended scenario)
   return 'text';
 }
 
-// GET /api/daily-question — return the currently active question
 router.get('/daily-question', async (req, res) => {
   try {
     const result = await pool.query("SELECT * FROM questions WHERE is_active = true");
@@ -93,8 +71,8 @@ router.get('/daily-question', async (req, res) => {
       ...q,
       text: q.injected_text || q.text,
       text_it: q.injected_text_it || q.text_it,
-      ui_type: normalizedType,               // canonical type for frontend rendering
-      raw_type: q.ui_type,                    // preserve original DB value for debugging
+      ui_type: normalizedType,
+      raw_type: q.ui_type,
     });
   } catch (err) {
     console.error(err);
@@ -102,7 +80,6 @@ router.get('/daily-question', async (req, res) => {
   }
 });
 
-// POST /api/answer — submit today's answer for a group
 router.post('/answer', strictLimiter, async (req, res) => {
   const { user_id, group_id, question_id, answer_text } = req.body;
   if (!answer_text || answer_text.trim().length === 0) return res.status(400).json({ error: "Answer cannot be empty." });
@@ -146,12 +123,10 @@ router.post('/answer', strictLimiter, async (req, res) => {
   }
 });
 
-// GET /api/answers/:group_id/:question_id — fetch answers (requires group membership)
 router.get('/answers/:group_id/:question_id', async (req, res) => {
   const { group_id, question_id } = req.params;
   const userId = parseInt(req.query.user_id, 10);
 
-  // Verify group membership before serving data
   if (userId) {
     const memberCheck = await pool.query(
       "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
@@ -179,7 +154,6 @@ router.get('/answers/:group_id/:question_id', async (req, res) => {
   }
 });
 
-// POST /api/suggest-question — user-submitted question idea
 router.post('/suggest-question', suggestionLimiter, async (req, res) => {
   const { user_name, question_text } = req.body;
   if (!question_text || question_text.trim().length < 5) {
@@ -200,7 +174,6 @@ router.post('/suggest-question', suggestionLimiter, async (req, res) => {
   }
 });
 
-// POST /api/push/subscribe — store push notification subscription
 router.post('/push/subscribe', async (req, res) => {
   const { user_id, subscription } = req.body;
   if (!user_id || !subscription) return res.status(400).json({ error: 'Missing parameters.' });
@@ -218,7 +191,6 @@ router.post('/push/subscribe', async (req, res) => {
   }
 });
 
-// GET /api/calendar/:group_id — list dates with archived answers
 router.get('/calendar/:group_id', async (req, res) => {
   try {
     const result = await pool.query(`
@@ -234,7 +206,6 @@ router.get('/calendar/:group_id', async (req, res) => {
   }
 });
 
-// GET /api/calendar/:group_id/:date — archived answers for a specific date
 router.get('/calendar/:group_id/:date', async (req, res) => {
   const { group_id, date } = req.params;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
@@ -253,7 +224,6 @@ router.get('/calendar/:group_id/:date', async (req, res) => {
   }
 });
 
-// GET /api/recap/:group_id/:period — weekly/monthly recap stats
 router.get('/recap/:group_id/:period', async (req, res) => {
   const { group_id, period } = req.params;
   if (!['weekly', 'monthly'].includes(period)) {

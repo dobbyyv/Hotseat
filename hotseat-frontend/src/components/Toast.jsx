@@ -2,10 +2,6 @@ import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle, X } from 'lucide-react'
 
-/**
- * Toast — a floating notification that auto-dismisses.
- * Used for copy confirmations, save success, etc.
- */
 export default function Toast({ message, visible, onClose }) {
   useEffect(() => {
     if (!visible) return

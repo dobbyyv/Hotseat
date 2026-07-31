@@ -1,7 +1,3 @@
-/**
- * Request/response logger middleware. Logs method, path, status code,
- * and response time with ANSI color coding for readability.
- */
 function requestLogger(req, res, next) {
   const start = Date.now();
   res.on('finish', () => {

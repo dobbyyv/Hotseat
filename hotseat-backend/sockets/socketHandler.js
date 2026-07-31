@@ -2,17 +2,12 @@ const { pool } = require('../config/db');
 const webpush = require('web-push');
 const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL } = require('../config/env');
 
-// Initialize VAPID details once at module scope
 webpush.setVapidDetails(
   'mailto:' + VAPID_EMAIL.replace(/^mailto:/i, ''),
   VAPID_PUBLIC_KEY,
   VAPID_PRIVATE_KEY
 );
 
-/**
- * Sends a push notification to all group members except the sender.
- * Stale subscriptions (410/404) are automatically removed from the database.
- */
 async function broadcastToGroup(groupId, senderId, title, body, targetUrl = '/') {
   try {
     const result = await pool.query(`
@@ -36,10 +31,6 @@ async function broadcastToGroup(groupId, senderId, title, body, targetUrl = '/')
   }
 }
 
-/**
- * Attaches Socket.io event handlers for room management and real-time chat.
- * Membership validation is performed against the database on every room join.
- */
 function registerSocketHandlers(io) {
   io.on('connection', (socket) => {
     socket.on('join_room', async (data) => {
@@ -67,7 +58,6 @@ function registerSocketHandlers(io) {
     });
 
     socket.on('typing_start', async (data) => {
-      // Validate group membership before broadcasting typing event
       const { group_id, user_id } = data || {};
       if (!group_id || !user_id) return;
       try {
@@ -101,7 +91,6 @@ function registerSocketHandlers(io) {
       const { group_id, user_id } = data || {};
       if (!group_id || !user_id) return;
 
-      // Validate group membership before broadcasting and persisting
       try {
         const memberCheck = await pool.query(
           "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",

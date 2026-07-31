@@ -57,10 +57,6 @@ function App() {
   const hasIdentity = !!user;
   const isFullyAuthenticated = hasIdentity && !!activeGroup;
 
-  // ── Zero-lag mouse tracking via native DOM ──
-  // CSS custom properties (--mx, --my) are written directly to the container
-  // element. Latest position is always stored in a ref so the rAF callback
-  // reads the freshest value — no stale closure captures.
   const containerRef = useRef(null)
   const posRef = useRef({ x: 0, y: 0 })
 
@@ -86,7 +82,6 @@ function App() {
     }
   }, [])
 
-  // Global WebSocket connection for real-time group updates
   useEffect(() => {
     if (!isFullyAuthenticated) return;
 

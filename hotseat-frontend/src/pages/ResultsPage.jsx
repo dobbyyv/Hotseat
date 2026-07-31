@@ -20,7 +20,6 @@ const REACTIONS = [
   { emoji: '💜', label: 'heart' },
 ]
 
-// ── VoteBreakdown · module-scoped to prevent re-creation on parent re-render ──
 const VoteBreakdown = ({ answers, groupMembers, serverUrl, revealed }) => {
   const total = answers.length
   const ranked = useMemo(() => {
@@ -61,7 +60,6 @@ const VoteBreakdown = ({ answers, groupMembers, serverUrl, revealed }) => {
               <span className="text-zinc-600 text-xs">{entry.count} vote{entry.count !== 1 ? 's' : ''}</span>
             </div>
           </div>
-          {/* PILLAR 4: Elevated progress bar with winner glow + shimmer */}
           <div className="w-full h-3 bg-zinc-800/80 rounded-full overflow-hidden p-[2px] border border-white/5 mb-2.5">
             <motion.div
               initial={{ width: 0 }}
@@ -95,7 +93,6 @@ const VoteBreakdown = ({ answers, groupMembers, serverUrl, revealed }) => {
   )
 }
 
-// ── AnswerCard · module-scoped ──
 const AnswerCard = ({ ans, index, isMe, revealed, serverUrl }) => {
   return (
     <motion.div initial={{ opacity: 0, x: -14 }} animate={revealed ? { opacity: 1, x: 0 } : {}} transition={{ delay: index * 0.1 }}
@@ -111,7 +108,6 @@ const AnswerCard = ({ ans, index, isMe, revealed, serverUrl }) => {
   )
 }
 
-// ── ChatBubble · module-scoped ──
 const ChatBubble = ({ msg, isMe, serverUrl }) => {
   return (
     <motion.div
@@ -211,7 +207,6 @@ export default function ResultsPage() {
         const r = await fetch(`https://api.giphy.com/v1/gifs/search?api_key=${GIPHY_KEY}&q=${encodeURIComponent(val)}&limit=12&rating=pg-13`)
         if (!r.ok) throw new Error(`Giphy API returned ${r.status}`)
         const d = await r.json()
-        // Giphy wraps results in d.data; validate it's an array
         setGifs(Array.isArray(d?.data) ? d.data : [])
       } catch (err) {
         console.error('Giphy error', err)
@@ -246,7 +241,6 @@ export default function ResultsPage() {
 
   return (
     <div className="w-full max-w-4xl mx-auto h-full flex flex-col">
-      {/* Header — fixed top, flex-shrink-0 */}
       <div className="flex justify-between items-center pt-3 pb-2 flex-shrink-0">
         <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold">Results</p>
         <div className="flex items-center gap-2">
@@ -255,7 +249,6 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Collapsible results card — natural height, not a flex aggressor */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -284,9 +277,6 @@ export default function ResultsPage() {
         </motion.div>
       </motion.div>
 
-      {/* Live Chat — strict flex-1 min-h-0 overflow-hidden so it NEVER
-          pushes beyond the viewport, even with 100+ messages.
-          Custom dark scrollbar via .chat-scrollbar utility class. */}
       <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-5 md:p-6">
         <div className="flex items-center gap-3 mb-3 flex-shrink-0">
           <div className="h-px flex-1 bg-white/10" />
@@ -320,9 +310,7 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {/* Bottom toolbar — flex-shrink-0, stays pinned to bottom */}
       <div className="flex-shrink-0 space-y-2 pt-2">
-        {/* Floating Quick Reactions */}
         <div className="flex items-center justify-center gap-2 flex-wrap">
           {REACTIONS.map(r => (
             <motion.button
@@ -337,7 +325,6 @@ export default function ResultsPage() {
           ))}
         </div>
 
-        {/* GIF Picker */}
         <AnimatePresence>
           {showGifPicker && (
             <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 16 }} transition={{ duration: 0.2 }}
@@ -355,7 +342,6 @@ export default function ResultsPage() {
           )}
         </AnimatePresence>
 
-        {/* Floating Input Pill */}
         <div className="relative flex items-center bg-zinc-900/90 border border-white/10 focus-within:border-white/30 rounded-full p-2 pl-5 shadow-2xl transition-all mb-1">
           <input type="file" ref={fileInputRef} onChange={handleImageUpload} accept="image/*" className="hidden" />
           <button onClick={() => { playSFX('click'); fileInputRef.current?.click() }} disabled={isUploading} className="p-1.5 text-zinc-400 hover:text-white transition-colors shrink-0">

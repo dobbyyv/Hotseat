@@ -5,11 +5,6 @@ const { pool } = require('../config/db');
 
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 
-/**
- * Schedules the 9:00 AM daily cron job. Archives yesterday's answers, clears
- * daily chat and chat image uploads, selects a new daily question, and sends
- * push notifications to all subscribed users.
- */
 function scheduleDailyDrop() {
   cron.schedule('0 9 * * *', async () => {
     console.log("\n9am daily drop started");
@@ -36,7 +31,6 @@ function scheduleDailyDrop() {
       await pool.query("DELETE FROM answers");
       await pool.query("DELETE FROM daily_chat");
 
-      // Clean up chat image uploads
       if (fs.existsSync(uploadsDir)) {
         const files = fs.readdirSync(uploadsDir);
         for (const file of files) {
@@ -46,7 +40,6 @@ function scheduleDailyDrop() {
         }
       }
 
-      // Determine question filter based on day
       let queryFilter;
       if (dayOfYear % 10 === 0) {
         queryFilter = "is_targeted = true";
@@ -76,7 +69,6 @@ function scheduleDailyDrop() {
       let finalEn = q.text;
       let finalIt = q.text_it;
 
-      // Resolve targeted questions
       if (q.is_targeted) {
         const targetRes = await pool.query(`
           SELECT u.* FROM users u
@@ -106,7 +98,6 @@ function scheduleDailyDrop() {
       );
       console.log(`drop: "${finalEn}"`);
 
-      // Push notifications
       const webpush = require('web-push');
       const allSubs = await pool.query("SELECT user_id, subscription FROM push_subscriptions");
       const payload = JSON.stringify({

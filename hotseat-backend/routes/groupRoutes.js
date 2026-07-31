@@ -4,7 +4,6 @@ const { strictLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
-// POST /api/join-group — add user to existing group by code
 router.post('/join-group', strictLimiter, async (req, res) => {
   const { user_id, code } = req.body;
   if (!user_id) return res.status(400).json({ error: "user_id required." });
@@ -50,7 +49,6 @@ router.post('/join-group', strictLimiter, async (req, res) => {
   }
 });
 
-// POST /api/create-group — create a new group
 router.post('/create-group', strictLimiter, async (req, res) => {
   const { user_id, group_name } = req.body;
   if (!user_id) return res.status(400).json({ error: "user_id required." });
@@ -97,7 +95,6 @@ router.post('/create-group', strictLimiter, async (req, res) => {
   }
 });
 
-// POST /api/leave-group — leave a group
 router.post('/leave-group', async (req, res) => {
   const { user_id, group_id } = req.body;
   if (!user_id || !group_id) return res.status(400).json({ error: "user_id and group_id required." });
@@ -111,13 +108,11 @@ router.post('/leave-group', async (req, res) => {
   }
 });
 
-// POST /api/update-group — rename a group (requires group membership)
 router.post('/update-group', strictLimiter, async (req, res) => {
   const { group_id, name, user_id } = req.body;
   if (!name || name.trim().length === 0) return res.status(400).json({ error: "Invalid name." });
   if (name.trim().length > 50) return res.status(400).json({ error: "Group name too long. Max 50 characters." });
 
-  // Verify the requester is a member of the group
   if (user_id) {
     const memberCheck = await pool.query(
       "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
@@ -139,7 +134,6 @@ router.post('/update-group', strictLimiter, async (req, res) => {
   }
 });
 
-// POST /api/admin/kick-member — kick a user from a group
 router.post('/admin/kick-member', async (req, res) => {
   const { requester_user_id, target_user_id, group_id } = req.body;
   if (!requester_user_id || !target_user_id || !group_id) return res.status(400).json({ error: "Missing parameters." });
@@ -182,7 +176,6 @@ router.post('/admin/kick-member', async (req, res) => {
   }
 });
 
-// GET /api/group-members/:group_id — list group members
 router.get('/group-members/:group_id', async (req, res) => {
   try {
     const result = await pool.query(`

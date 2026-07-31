@@ -1,6 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
 
-// ── Configuration ──
 const ORB_COUNT = 48
 const MIN_RADIUS = 3
 const MAX_RADIUS = 6
@@ -8,18 +7,17 @@ const MIN_SPEED = 0.50
 const MAX_SPEED = 1.6
 const GLOW_ALPHA = 0.08
 const CORE_ALPHA = 0.18
-const DAMPING = 0.997           // per-frame velocity decay
-const WALL_DAMPING = 0.7        // energy retained after wall bounce
-const MAX_FLING = 6             // cap fling speed
+const DAMPING = 0.997
+const WALL_DAMPING = 0.7
+const MAX_FLING = 6
 
 export default function OrbField() {
   const canvasRef = useRef(null)
   const orbsRef = useRef([])
   const animRef = useRef(null)
-  const dragRef = useRef(null) // { index, offsetX, offsetY, trail: [{x,y,t}] }
+  const dragRef = useRef(null)
   const dimsRef = useRef({ w: 0, h: 0 })
 
-  // Helpers 
   const resize = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -33,7 +31,6 @@ export default function OrbField() {
     dimsRef.current = { w, h, dpr }
   }, [])
 
-  // Spawn orbs 
   const spawnOrbs = useCallback(() => {
     const { w, h } = dimsRef.current
     const orbs = []
@@ -46,13 +43,12 @@ export default function OrbField() {
         vx: (Math.random() - 0.5) * MAX_SPEED * 2,
         vy: (Math.random() - 0.5) * MAX_SPEED * 2,
         r,
-        hue: rand(200, 260), // cool blue-white range
+        hue: rand(200, 260),
       })
     }
     orbsRef.current = orbs
   }, [])
 
-  // Particle-particle elastic collision
   const collideParticles = (a, b) => {
     const dx = b.x - a.x
     const dy = b.y - a.y
@@ -60,25 +56,21 @@ export default function OrbField() {
     const minDist = a.r + b.r
     if (dist === 0 || dist >= minDist) return
 
-    // Normal and tangent
     const nx = dx / dist
     const ny = dy / dist
     const tx = -ny
     const ty = nx
 
-    // Velocity components
     const v1n = a.vx * nx + a.vy * ny
     const v1t = a.vx * tx + a.vy * ty
     const v2n = b.vx * nx + b.vy * ny
     const v2t = b.vx * tx + b.vy * ty
 
-    // Swap normal components (elastic, equal-mass approximation)
     a.vx = v2n * nx + v1t * tx
     a.vy = v2n * ny + v1t * ty
     b.vx = v1n * nx + v2t * tx
     b.vy = v1n * ny + v2t * ty
 
-    // Push apart to prevent sticking
     const overlap = minDist - dist
     const pushX = nx * overlap * 0.55
     const pushY = ny * overlap * 0.55
@@ -88,7 +80,6 @@ export default function OrbField() {
     b.y += pushY
   }
 
-  // Animation loop 
   const loop = useCallback(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -100,18 +91,15 @@ export default function OrbField() {
     ctx.clearRect(0, 0, w * dpr, h * dpr)
     ctx.scale(dpr, dpr)
 
-    // Update physics (skip dragged orb)
     for (let i = 0; i < orbs.length; i++) {
       if (dragging && dragging.index === i) continue
       const o = orbs[i]
 
-      // Wall bounce with energy loss
       if (o.x - o.r <= 0) { o.x = o.r; o.vx = Math.abs(o.vx) * WALL_DAMPING }
       if (o.x + o.r >= w) { o.x = w - o.r; o.vx = -Math.abs(o.vx) * WALL_DAMPING }
       if (o.y - o.r <= 0) { o.y = o.r; o.vy = Math.abs(o.vy) * WALL_DAMPING }
       if (o.y + o.r >= h) { o.y = h - o.r; o.vy = -Math.abs(o.vy) * WALL_DAMPING }
 
-      // Natural velocity decay — flings settle back to drift
       o.vx *= DAMPING
       o.vy *= DAMPING
       if (Math.abs(o.vx) < MIN_SPEED * 0.1) o.vx = (Math.random() - 0.5) * MIN_SPEED
@@ -121,7 +109,6 @@ export default function OrbField() {
       o.y += o.vy
     }
 
-    // Particle collisions (only if not dragging)
     for (let i = 0; i < orbs.length; i++) {
       if (dragging && dragging.index === i) continue
       for (let j = i + 1; j < orbs.length; j++) {
@@ -130,11 +117,14 @@ export default function OrbField() {
       }
     }
 
-    // Render orbs
     for (const o of orbs) {
       const isDragged = dragging && orbs.indexOf(o) === dragging.index
 
-      // Outer glow
+      // sub-surface glow via canvas shadowBlur — diffuses through translucent UI panels
+      ctx.save()
+      ctx.shadowColor = `hsla(${o.hue}, 60%, 80%, 0.55)`
+      ctx.shadowBlur = 22
+
       const glow = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r * 3)
       glow.addColorStop(0, `hsla(${o.hue}, 60%, 80%, ${GLOW_ALPHA})`)
       glow.addColorStop(0.5, `hsla(${o.hue}, 50%, 70%, ${GLOW_ALPHA * 0.3})`)
@@ -144,7 +134,12 @@ export default function OrbField() {
       ctx.arc(o.x, o.y, o.r * 3, 0, Math.PI * 2)
       ctx.fill()
 
-      // Core
+      ctx.restore()
+
+      ctx.save()
+      ctx.shadowColor = `hsla(${o.hue}, 40%, 90%, 0.45)`
+      ctx.shadowBlur = 14
+
       const core = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r)
       core.addColorStop(0, `hsla(${o.hue}, 30%, 95%, ${isDragged ? 0.5 : CORE_ALPHA})`)
       core.addColorStop(0.6, `hsla(${o.hue}, 40%, 85%, ${CORE_ALPHA * 0.5})`)
@@ -153,18 +148,18 @@ export default function OrbField() {
       ctx.beginPath()
       ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2)
       ctx.fill()
+
+      ctx.restore()
     }
 
-    ctx.setTransform(1, 0, 0, 1, 0, 0) // reset dpr scale
+    ctx.setTransform(1, 0, 0, 1, 0, 0)
     animRef.current = requestAnimationFrame(loop)
   }, [])
 
-  // Pointer helpers (shared by mouse + touch)
   const getCoords = useCallback((e) => {
     const canvas = canvasRef.current
     if (!canvas) return { x: 0, y: 0 }
     const rect = canvas.getBoundingClientRect()
-    // Handle both mouse and touch events
     const clientX = e.touches ? e.touches[0]?.clientX ?? e.changedTouches[0]?.clientX : e.clientX
     const clientY = e.touches ? e.touches[0]?.clientY ?? e.changedTouches[0]?.clientY : e.clientY
     return { x: clientX - rect.left, y: clientY - rect.top }
@@ -176,12 +171,11 @@ export default function OrbField() {
       const o = orbs[i]
       const dx = px - o.x
       const dy = py - o.y
-      if (Math.sqrt(dx * dx + dy * dy) <= o.r * 3) return i // larger hit area for usability
+      if (Math.sqrt(dx * dx + dy * dy) <= o.r * 3) return i
     }
     return -1
   }, [])
 
-  // ── Mouse handlers
   const handlePointerDown = useCallback((e) => {
     e.preventDefault()
     const { x, y } = getCoords(e)
@@ -204,13 +198,11 @@ export default function OrbField() {
     const o = orbsRef.current[dragging.index]
     o.x = x + dragging.offsetX
     o.y = y + dragging.offsetY
-    // Clamp to viewport
     const { w, h } = dimsRef.current
     if (o.x < o.r) o.x = o.r
     if (o.x > w - o.r) o.x = w - o.r
     if (o.y < o.r) o.y = o.r
     if (o.y > h - o.r) o.y = h - o.r
-    // Track trail for velocity on release
     const now = performance.now()
     dragging.trail.push({ x, y, t: now })
     if (dragging.trail.length > 5) dragging.trail.shift()
@@ -222,18 +214,16 @@ export default function OrbField() {
     if (!dragging) return
     const { x, y } = getCoords(e)
     const trail = dragging.trail
-    // Compute fling velocity from last few positions
     if (trail.length >= 2) {
       const first = trail[0]
       const last = trail[trail.length - 1]
-      const dt = (last.t - first.t) / 1000 // seconds
+      const dt = (last.t - first.t) / 1000
       if (dt > 0.01) {
         const dx = last.x - first.x
         const dy = last.y - first.y
         const o = orbsRef.current[dragging.index]
-        o.vx = (dx / dt) * 0.06 // scale down for reasonable fling speed
+        o.vx = (dx / dt) * 0.06
         o.vy = (dy / dt) * 0.06
-        // Cap fling speed
         const speed = Math.sqrt(o.vx * o.vx + o.vy * o.vy)
         if (speed > 8) {
           o.vx = (o.vx / speed) * 8
@@ -244,7 +234,6 @@ export default function OrbField() {
     dragRef.current = null
   }, [getCoords])
 
-  // ── Init / teardown ──
   useEffect(() => {
     resize()
     spawnOrbs()
@@ -253,17 +242,12 @@ export default function OrbField() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    // Mouse events
     canvas.addEventListener('mousedown', handlePointerDown)
     window.addEventListener('mousemove', handlePointerMove)
     window.addEventListener('mouseup', handlePointerUp)
-
-    // Touch events
     canvas.addEventListener('touchstart', handlePointerDown, { passive: false })
     window.addEventListener('touchmove', handlePointerMove, { passive: false })
     window.addEventListener('touchend', handlePointerUp)
-
-    // Resize
     window.addEventListener('resize', resize)
 
     return () => {

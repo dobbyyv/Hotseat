@@ -5,7 +5,6 @@ const { strictLimiter } = require('../middleware/rateLimiter');
 
 const router = express.Router();
 
-// POST /api/join — create user + join or create group
 router.post('/join', strictLimiter, async (req, res) => {
   const { name, code } = req.body;
   if (!name || name.trim().length < 1) return res.status(400).json({ error: "Name required." });
@@ -73,7 +72,6 @@ router.post('/join', strictLimiter, async (req, res) => {
   }
 });
 
-// POST /api/set-password — set bcrypt recovery password
 router.post('/set-password', strictLimiter, async (req, res) => {
   const { user_id, password } = req.body;
   if (!password || password.length < 4) return res.status(400).json({ error: "Password must be at least 4 characters." });
@@ -87,7 +85,6 @@ router.post('/set-password', strictLimiter, async (req, res) => {
   }
 });
 
-// POST /api/recover-account — recover by name + password
 router.post('/recover-account', strictLimiter, async (req, res) => {
   const { name, password } = req.body;
   if (!name || !password) return res.status(400).json({ error: "Name and password required." });
@@ -136,7 +133,6 @@ router.post('/recover-account', strictLimiter, async (req, res) => {
   }
 });
 
-// GET /api/user-groups/:user_id — list groups for a user
 router.get('/user-groups/:user_id', async (req, res) => {
   const { user_id } = req.params;
   try {
@@ -158,7 +154,6 @@ router.get('/user-groups/:user_id', async (req, res) => {
   }
 });
 
-// POST /api/upload-pfp — profile picture upload
 router.post('/upload-pfp', strictLimiter, (req, res) => {
   const { uploadPfp } = require('../middleware/upload');
   uploadPfp.single('avatar')(req, res, async (err) => {

@@ -9,16 +9,11 @@ const pool = new Pool({
   port: DB_PORT,
 });
 
-/**
- * Connects to PostgreSQL and runs schema auto-patch to ensure all required
- * columns and tables exist. Idempotent — safe to run on every startup.
- */
 async function initDatabase() {
   const client = await pool.connect();
   try {
     console.log('Connected to PostgreSQL');
 
-    // Column migrations (ADD COLUMN IF NOT EXISTS)
     await client.query("ALTER TABLE groups ADD COLUMN IF NOT EXISTS name VARCHAR(100);");
     await client.query("ALTER TABLE questions ADD COLUMN IF NOT EXISTS text_it TEXT;");
     await client.query("ALTER TABLE questions ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT false;");
@@ -33,7 +28,6 @@ async function initDatabase() {
     await client.query("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS streak_count INTEGER DEFAULT 0;");
     await client.query("ALTER TABLE group_members ADD COLUMN IF NOT EXISTS last_answered_date DATE;");
 
-    // Table creation (CREATE TABLE IF NOT EXISTS)
     await client.query(`
       CREATE TABLE IF NOT EXISTS push_subscriptions (
         id SERIAL PRIMARY KEY,
@@ -43,7 +37,6 @@ async function initDatabase() {
       )
     `);
 
-    // Idempotent answers table creation with uniqueness constraint
     await client.query(`
       CREATE TABLE IF NOT EXISTS answers (
         id SERIAL PRIMARY KEY,
@@ -55,7 +48,6 @@ async function initDatabase() {
       )
     `);
 
-    // Ensure unique constraint exists on answers
     try {
       await client.query(`
         DO $$
@@ -113,7 +105,6 @@ async function initDatabase() {
       )
     `);
 
-    // Activate a question if none is active
     const activeCheck = await client.query("SELECT id FROM questions WHERE is_active = true");
     if (activeCheck.rows.length === 0) {
       console.log("No active question found. Activating one...");

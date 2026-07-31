@@ -13,8 +13,6 @@ import AnimatedNumber from '../components/AnimatedNumber'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL
 
-// Moved outside HomePage so it's not re-created on every parent re-render,
-// preventing unmount/remount cycles on AnimatedNumber's useMotionValue hooks.
 function CountdownTimer({ lang }) {
   const [time, setTime] = useState(() => {
     const now = new Date()
@@ -46,8 +44,6 @@ function CountdownTimer({ lang }) {
     return () => clearInterval(timer)
   }, [])
 
-  // Memoize the three AnimatedNumber instances so their keys stay stable
-  // across re-renders triggered by the interval.
   const timerDisplay = useMemo(() => (
     <span className="text-xs font-mono font-bold tracking-widest uppercase text-zinc-500">
       {lang === 'en' ? 'New question in' : 'Nuova domanda tra'}{' '}

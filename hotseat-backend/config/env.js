@@ -7,7 +7,6 @@ const {
   CORS_ORIGIN, SERVER_PORT = '5000'
 } = process.env;
 
-// Validate all required environment variables are present.
 // The server will refuse to start if any are missing.
 const required = [
   'DB_USER', 'DB_HOST', 'DB_NAME', 'DB_PASSWORD', 'DB_PORT',

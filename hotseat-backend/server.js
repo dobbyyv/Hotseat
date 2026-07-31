@@ -16,24 +16,20 @@ const { uploadsDir } = require('./middleware/upload');
 const app = express();
 app.set('trust proxy', 1);
 
-// Security & parsing middleware
 app.use(helmet());
 app.use(cors({ origin: CORS_ORIGIN, methods: ['GET', 'POST'], credentials: true }));
 app.use(express.json({ limit: '1mb' }));
 app.use('/api/', generalLimiter);
 app.use(requestLogger);
 
-// Static file serving for uploads and frontend build
 app.use('/uploads', express.static(uploadsDir));
 app.use(express.static(path.join(__dirname, 'dist')));
 
-// API routes — mounted under /api so paths inside the routers are relative
 app.use('/api', require('./routes/authRoutes'));
 app.use('/api', require('./routes/groupRoutes'));
 app.use('/api', require('./routes/answerRoutes'));
 app.use('/api', require('./routes/chatRoutes'));
 
-// SPA fallback — serve index.html for any non-API, non-upload route
 app.get(/^(?!\/(api|uploads)).*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
@@ -43,7 +39,6 @@ const io = new Server(server, { cors: { origin: CORS_ORIGIN, methods: ['GET', 'P
 app.set('io', io);
 registerSocketHandlers(io);
 
-// Startup sequence: initialize database, schedule cron, then listen
 initDatabase().then(() => {
   scheduleDailyDrop();
   server.listen(SERVER_PORT, () => {
@@ -54,7 +49,6 @@ initDatabase().then(() => {
   process.exit(1);
 });
 
-// Graceful shutdown
 const shutdown = () => {
   console.log("Shutdown signal received...");
   setTimeout(() => { console.error("Force closing."); process.exit(1); }, 3000);
