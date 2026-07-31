@@ -295,7 +295,7 @@ export default function ResultsPage() {
 
       {/* ───── RIGHT COLUMN: Live Chat (complete panel) ───── */}
       <div className="flex flex-col min-h-0 mt-3 lg:mt-0 lg:col-span-7 lg:h-full lg:overflow-hidden">
-        <div className="flex-1 min-h-0 flex flex-col bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-5 md:p-6">
+        <div className="flex-1 min-h-0 flex flex-col bg-zinc-900/40 border border-white/10 backdrop-blur-2xl rounded-3xl p-5 md:p-6 pb-24">
 
           {/* Chat header */}
           <div className="flex items-center gap-3 mb-3 flex-shrink-0">
