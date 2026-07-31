@@ -257,23 +257,29 @@ export default function OrbField() {
     const canvas = canvasRef.current
     if (!canvas) return
 
-    canvas.addEventListener('mousedown', handlePointerDown)
-    window.addEventListener('mousemove', handlePointerMove)
-    window.addEventListener('mouseup', handlePointerUp)
-    canvas.addEventListener('touchstart', handlePointerDown, { passive: false })
-    window.addEventListener('touchmove', handlePointerMove, { passive: false })
-    window.addEventListener('touchend', handlePointerUp)
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches
     window.addEventListener('resize', resize)
+
+    if (!isTouchDevice) {
+      canvas.addEventListener('mousedown', handlePointerDown)
+      window.addEventListener('mousemove', handlePointerMove)
+      window.addEventListener('mouseup', handlePointerUp)
+      canvas.addEventListener('touchstart', handlePointerDown, { passive: false })
+      window.addEventListener('touchmove', handlePointerMove, { passive: false })
+      window.addEventListener('touchend', handlePointerUp)
+    }
 
     return () => {
       if (animRef.current) cancelAnimationFrame(animRef.current)
-      canvas.removeEventListener('mousedown', handlePointerDown)
-      window.removeEventListener('mousemove', handlePointerMove)
-      window.removeEventListener('mouseup', handlePointerUp)
-      canvas.removeEventListener('touchstart', handlePointerDown)
-      window.removeEventListener('touchmove', handlePointerMove)
-      window.removeEventListener('touchend', handlePointerUp)
       window.removeEventListener('resize', resize)
+      if (!isTouchDevice) {
+        canvas.removeEventListener('mousedown', handlePointerDown)
+        window.removeEventListener('mousemove', handlePointerMove)
+        window.removeEventListener('mouseup', handlePointerUp)
+        canvas.removeEventListener('touchstart', handlePointerDown)
+        window.removeEventListener('touchmove', handlePointerMove)
+        window.removeEventListener('touchend', handlePointerUp)
+      }
     }
   }, [resize, spawnOrbs, loop, handlePointerDown, handlePointerMove, handlePointerUp])
 
@@ -281,7 +287,7 @@ export default function OrbField() {
     <>
       <canvas
         ref={canvasRef}
-        className="fixed inset-0 z-0 pointer-events-auto"
+        className="fixed inset-0 z-0 pointer-events-none md:pointer-events-auto"
         style={{ touchAction: 'none' }}
         aria-hidden="true"
       />
