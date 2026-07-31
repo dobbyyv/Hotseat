@@ -34,7 +34,7 @@ function normalizeQuestionType(question) {
     'who is most likely', 'who would be the first', 'chi è più probabile',
     'who would', 'which friend', 'pick a member', 'tag a friend',
     'choose someone', 'point at', 'nominate', 'seleziona',
-    '{target}', 'most likely to', 'qualcuno che',
+    '{target}', 'qualcuno che',
   ];
   if (nominationPatterns.some(p => text.includes(p))) {
     return 'vote_member';

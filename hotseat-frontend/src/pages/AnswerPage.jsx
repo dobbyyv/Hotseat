@@ -38,10 +38,10 @@ export default function AnswerPage() {
     setSubmitError(null); setIsSubmitting(true); playSFX('click')
     let final
     const type = question.ui_type
-    if (type === 'text') final = answer
     if (type === 'choice') final = selected
-    if (type === 'slider') final = `${sliderVal}/100`
-    if (type === 'vote_member' || type === 'tag') final = taggedFriend?.name
+    else if (type === 'slider') final = `${sliderVal}/100`
+    else if (type === 'vote_member' || type === 'tag') final = taggedFriend?.name
+    else final = answer
     const success = await submitAnswer(final); setIsSubmitting(false)
     if (success) { playSFX('success'); setSubmitted(true); setTimeout(() => navigate('/results'), 1800) }
     else { playSFX('error'); setSubmitError(useStore.getState().error || "Failed to submit.") }
@@ -49,11 +49,10 @@ export default function AnswerPage() {
 
   const canSubmit = () => {
     const type = question.ui_type
-    if (type === 'text') return answer.trim().length > 0
     if (type === 'choice') return selected !== null
     if (type === 'slider') return true
     if (type === 'vote_member' || type === 'tag') return taggedFriend !== null
-    return false
+    return answer.trim().length > 0
   }
 
   return (
@@ -70,7 +69,7 @@ export default function AnswerPage() {
       </motion.div>
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
-        {question.ui_type === 'text' && (
+        {(question.ui_type === 'text' || !['choice', 'slider', 'vote_member'].includes(question.ui_type)) && (
           <textarea value={answer} onChange={(e) => setAnswer(e.target.value)} placeholder={text.typeAnswer || 'Type your truth...'} autoFocus
             className="w-full bg-zinc-800/80 border border-white/10 focus:border-white/30 rounded-2xl p-6 text-white placeholder:text-zinc-600 outline-none resize-none h-48 transition-colors text-lg font-medium leading-relaxed select-text" />
         )}
@@ -99,7 +98,7 @@ export default function AnswerPage() {
           </div>
         )}
 
-        {(question.ui_type === 'vote_member' || question.ui_type === 'tag') && (
+        {question.ui_type === 'vote_member' && (
           <div className="flex flex-col gap-3">
             {group?.members?.map(friend => (
               <motion.button key={friend.id} whileTap={{ scale: 0.97 }} onClick={() => { playSFX('click'); setTaggedFriend(friend) }}
