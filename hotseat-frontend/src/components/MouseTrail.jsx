@@ -54,23 +54,30 @@ export default function MouseTrail() {
       }
 
       if (pts.length > 1) {
-        for (let i = 1; i < pts.length; i++) {
-          const prev = pts[i - 1]
-          const curr = pts[i]
-          const midX = (prev.x + curr.x) / 2
-          const midY = (prev.y + curr.y) / 2
-          const alpha = curr.life * 0.45
-          const width = curr.life * 4
+        ctx.lineCap = 'round'
+        ctx.lineJoin = 'round'
+
+        const headAlpha = pts[pts.length - 1].life * 0.55
+
+        for (let pass = 0; pass < 3; pass++) {
+          const passAlpha = headAlpha * (1 - pass * 0.25)
+          const passWidth = (4 - pass * 1.2) * pts[pts.length - 1].life
 
           ctx.beginPath()
-          ctx.moveTo(prev.x, prev.y)
-          ctx.quadraticCurveTo(prev.x, prev.y, midX, midY)
-          ctx.strokeStyle = `rgba(170, 170, 190, ${alpha})`
-          ctx.lineWidth = width
-          ctx.lineCap = 'round'
-          ctx.lineJoin = 'round'
-          ctx.shadowColor = `rgba(190, 190, 210, ${alpha * 0.5})`
-          ctx.shadowBlur = 6
+          ctx.moveTo(pts[0].x, pts[0].y)
+
+          for (let i = 1; i < pts.length; i++) {
+            const prev = pts[i - 1]
+            const curr = pts[i]
+            const midX = (prev.x + curr.x) / 2
+            const midY = (prev.y + curr.y) / 2
+            ctx.quadraticCurveTo(prev.x, prev.y, midX, midY)
+          }
+
+          ctx.strokeStyle = `rgba(170, 170, 195, ${passAlpha})`
+          ctx.lineWidth = passWidth
+          ctx.shadowColor = `rgba(190, 190, 215, ${passAlpha * 0.4})`
+          ctx.shadowBlur = 4 + pass * 2
           ctx.stroke()
         }
 
