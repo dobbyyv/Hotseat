@@ -10,7 +10,6 @@ function normalizeQuestionType(question) {
   const raw = (question.ui_type || '').toLowerCase().trim();
 
   const ALIAS_MAP = {
-    'tag':          'vote_member',
     'vote':         'vote_member',
     'vote_member':  'vote_member',
     'nomination':   'vote_member',
