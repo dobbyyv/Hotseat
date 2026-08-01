@@ -76,7 +76,7 @@ export default function AnswerPage() {
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         {(question.ui_type === 'text' || !['choice', 'slider', 'vote_member'].includes(question.ui_type)) && (
-           <textarea value={answer || ''} onChange={(e) => setAnswer(e.target.value)} placeholder={text.typeAnswer || 'Type your truth...'} autoFocus
+           <textarea value={answer || ''} onChange={(e) => setAnswer(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && canSubmit()) { e.preventDefault(); handleSubmit() }}} placeholder={text.typeAnswer || 'Type your truth...'} autoFocus
             className="w-full bg-zinc-800/80 border border-white/10 focus:border-white/30 rounded-2xl p-6 text-white placeholder:text-zinc-600 outline-none resize-none h-48 transition-colors text-lg font-medium leading-relaxed select-text" />
         )}
 
