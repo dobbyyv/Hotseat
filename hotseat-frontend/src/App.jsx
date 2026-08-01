@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useSearchParams, useNavigate } from 'react-router-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { io } from 'socket.io-client'
 
@@ -23,9 +23,32 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL;
 
 function AnimatedRoutes() {
   const location = useLocation()
-  const { user, group: activeGroup } = useStore()
+  const navigateTo = useNavigate()
+  const [searchParams] = useSearchParams()
+  const { user, group: activeGroup, joinAdditionalGroup, setActiveGroup } = useStore()
   const hasIdentity = !!user
   const isFullyAuthenticated = hasIdentity && !!activeGroup
+
+  // Deep-link invite interception: ?join=CODE
+  useEffect(() => {
+    const joinCode = searchParams.get('join')
+    if (!joinCode || joinCode.length < 4) return
+
+    if (hasIdentity) {
+      // Scenario A: logged-in user — auto-join the group
+      joinAdditionalGroup(joinCode).then((group) => {
+        if (group) {
+          setActiveGroup(group)
+          navigateTo('/home', { replace: true })
+        } else {
+          navigateTo('/hub', { replace: true })
+        }
+      }).catch(() => {
+        navigateTo('/hub', { replace: true })
+      })
+    }
+    // Scenario B: logged-out user — JoinPage reads ?join= from URL naturally
+  }, [searchParams, hasIdentity])
 
   return (
     <AnimatePresence mode="wait">

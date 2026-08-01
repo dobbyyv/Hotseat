@@ -86,12 +86,13 @@ export default function HomePage() {
   const visibleMembers = group?.members?.slice(0, maxAvatars) || []
   const extraMembersCount = Math.max(0, totalCount - maxAvatars)
 
+  const inviteUrl = `https://hotseat.site?join=${group?.code || ''}`
   const handleShare = async () => {
     playSFX('click')
-    const shareData = { title: 'Hotseat', text: `Join my Hotseat group! Code: ${group?.code}`, url: 'https://hotseat.site' }
+    const shareData = { title: 'Hotseat', text: `Join my Hotseat group! Code: ${group?.code}`, url: inviteUrl }
     if (navigator.share) { try { await navigator.share(shareData) } catch { fallbackCopy() } } else fallbackCopy()
   }
-  const fallbackCopy = () => { navigator.clipboard.writeText(group?.code || ''); setCopied(true); setTimeout(() => setCopied(false), 2000) }
+  const fallbackCopy = () => { navigator.clipboard.writeText(inviteUrl); setCopied(true); setTimeout(() => setCopied(false), 2000) }
 
   const handleSuggest = async () => {
     if (suggestionText.trim().length < 5) return
@@ -202,7 +203,7 @@ export default function HomePage() {
       {/* Share */}
       <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }} onClick={handleShare} className="w-full mt-4 flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors py-3">
         {copied ? <Check size={13} className="text-emerald-500" /> : <Share size={13} />}
-        <span className="text-xs font-mono tracking-widest">{copied ? text.copied : `${text.inviteCode}: ${group?.code}`}</span>
+        <span className="text-xs font-mono tracking-widest">{copied ? (text.inviteCopied || 'Invite link copied!') : `${text.inviteCode}: ${group?.code}`}</span>
       </motion.button>
 
       {/* Timer */}

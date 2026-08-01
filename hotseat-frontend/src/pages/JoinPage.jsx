@@ -12,8 +12,10 @@ export default function JoinPage() {
   const [name, setName] = useState('')
   const [code, setCode] = useState(() => {
     const params = new URLSearchParams(window.location.search)
-    return params.get('code') || ''
+    return params.get('join') || params.get('code') || ''
   })
+  // Frictionless deep-link: if code is present, show single-step name-only form
+  const isDeepLink = !!code
   
   // Login modal state
   const [isLoggingIn, setIsLoggingIn] = useState(false)
@@ -52,10 +54,20 @@ export default function JoinPage() {
     }
   }
 
-  const handleName = (e) => {
+  const handleName = async (e) => {
     e?.preventDefault()
     if (name.trim().length < 2) return
     playSFX('click')
+    if (isDeepLink) {
+      // Frictionless: skip code entry, join directly with pre-filled code
+      playSFX('thock')
+      const success = await joinGroup(name.trim(), code.trim())
+      if (success) {
+        playSFX('success')
+        navigate('/home')
+      }
+      return
+    }
     setStep(1)
   }
 
