@@ -52,7 +52,7 @@ export default function AnswerPage() {
     if (type === 'choice') return selected !== null
     if (type === 'slider') return true
     if (type === 'vote_member' || type === 'tag') return taggedFriend !== null
-    return typeof answer === 'string' && answer.trim().length >= 3
+    return typeof answer === 'string' && answer.trim().length >= 3 && answer.length <= 150
   }
 
   return (
@@ -76,8 +76,20 @@ export default function AnswerPage() {
 
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
         {(question.ui_type === 'text' || !['choice', 'slider', 'vote_member'].includes(question.ui_type)) && (
-           <textarea value={answer || ''} onChange={(e) => setAnswer(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && canSubmit()) { e.preventDefault(); handleSubmit() }}} placeholder={text.typeAnswer || 'Type your truth...'} autoFocus
-            className="w-full bg-zinc-800/80 border border-white/10 focus:border-white/30 rounded-2xl p-6 text-white placeholder:text-zinc-600 outline-none resize-none h-48 transition-colors text-lg font-medium leading-relaxed select-text" />
+          <div className="relative">
+            <textarea
+              value={answer || ''}
+              onChange={(e) => { const v = e.target.value; if (v.length <= 150) setAnswer(v) }}
+              onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey && canSubmit()) { e.preventDefault(); handleSubmit() }}}
+              placeholder={text.typeAnswer || 'Type your truth...'}
+              maxLength={150}
+              autoFocus
+              className="w-full bg-zinc-800/80 border border-white/10 focus:border-white/30 rounded-2xl p-6 pb-10 text-white placeholder:text-zinc-600 outline-none resize-none h-48 transition-colors text-lg font-medium leading-relaxed select-text"
+            />
+            <span className={`absolute bottom-3 right-4 text-xs font-mono font-bold transition-colors ${answer.length >= 150 ? 'text-red-400' : answer.length > 130 ? 'text-amber-400' : 'text-zinc-600'}`}>
+              {answer.length} / 150
+            </span>
+          </div>
         )}
 
         {question.ui_type === 'choice' && question.options && (
