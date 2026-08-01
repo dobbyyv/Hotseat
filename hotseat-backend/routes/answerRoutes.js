@@ -29,6 +29,14 @@ function normalizeQuestionType(question) {
   const text = ((question.injected_text || question.text || '') + ' ' +
                 (question.injected_text_it || question.text_it || '')).toLowerCase();
 
+  // Interrogative detection: questions starting with "who" / "chi" are asking
+  // about a person → vote_member nomination. Questions starting with "what",
+  // "how", "why", "when", "where" → text (caught by the final fallback).
+  const trimmedText = text.trim();
+  if (/^(who|chi)\b/i.test(trimmedText)) {
+    return 'vote_member';
+  }
+
   const nominationPatterns = [
     'who is most likely', 'who would be the first', 'chi è più probabile',
     'who would', 'which friend', 'pick a member', 'tag a friend',
