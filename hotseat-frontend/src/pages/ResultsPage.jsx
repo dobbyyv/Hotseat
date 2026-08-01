@@ -1,16 +1,18 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Send, Loader2, Image as ImageIcon, Smile, X, ChevronDown, ChevronUp } from 'lucide-react'
+import { Send, Loader2, Image as ImageIcon, Smile, X, ChevronDown, ChevronUp, AlertTriangle } from 'lucide-react'
 import { io } from 'socket.io-client'
 import useStore from '../store/useStore'
 import { t } from '../translations'
 import { subscribeToPushNotifications } from '../pushUtility'
 import useSFX from '../useSFX'
 import AnimatedNumber from '../components/AnimatedNumber'
+import Toast from '../components/Toast'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL
 const GIPHY_KEY = import.meta.env.VITE_GIPHY_KEY || ''
+const MAX_CHAT_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 
 const REACTIONS = [
   { emoji: '🔥', label: 'fire' },
@@ -154,6 +156,7 @@ export default function ResultsPage() {
   const [gifQuery, setGifQuery] = useState('')
   const [gifs, setGifs] = useState([])
   const [isSearchingGifs, setIsSearchingGifs] = useState(false)
+  const [uploadError, setUploadError] = useState(null)
   const gifDebounceRef = useRef(null)
 
   useEffect(() => { chatEndRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
@@ -191,11 +194,17 @@ export default function ResultsPage() {
 
   const handleImageUpload = async e => {
     const file = e.target.files?.[0]; if (!file) return
-    if (file.size > 10 * 1024 * 1024) { alert('Max 10 MB.'); return }
+    if (file.size > MAX_CHAT_FILE_SIZE) {
+      playSFX('error')
+      setUploadError('File too large. Max 5MB.')
+      return
+    }
     setIsUploading(true); playSFX('thock')
     const fd = new FormData(); fd.append('image', file); fd.append('group_id', group.id)
     try { const r = await fetch(`${SERVER_URL}/api/chat-image`, { method: 'POST', body: fd }); const d = await r.json(); if (d.url) emitMessage('image', d.url) } catch (err) { console.error('Upload failed', err) }
     setIsUploading(false)
+    // Reset file input so the same file can be selected again
+    if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
   const handleGifQueryChange = val => {
@@ -378,6 +387,9 @@ export default function ResultsPage() {
           </motion.button>
         </div>
       </div>
+
+      {/* Upload error toast */}
+      <Toast message={uploadError || ''} visible={!!uploadError} onClose={() => setUploadError(null)} />
 
     </div>
   )
