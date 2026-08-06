@@ -11,7 +11,7 @@ Hotseat started as a simple, zero-stress app built just for me and my friends to
 
 Instead of treating it like a static homework assignment, I started "min-maxing" it, diving down rabbit holes to figure out how real-time WebSockets actually behave under the hood, how to structure clean Express routing, and how to patch backend gaps, just to see how a robust system should be built. It wasn't about enterprise compliance; it was about the satisfaction of taking a scrappy project and making it clean, fast, and genuinely well-engineered.
 
-**Live Demo:** [hotseat.site](https://hotseat.site)
+**Live Demo:** [hotseat.site](https://hotseat.site) / Temporarily off 
 
 ---
 
