@@ -9,11 +9,23 @@ A real-time daily question platform for friend groups. One question drops every 
 
 Hotseat started as a simple, zero-stress app built just for me and my friends to use daily. But as I kept working on it, it turned into an accidental playground for learning full-stack engineering. 
 
-Instead of treating it like a static homework assignment, I started "min-maxing" it, diving down rabbit holes to figure out how real-time WebSockets actually behave under the hood, how to structure clean Express routing, and how to patch backend gaps, just to see how a robust system should be built. It wasn't about enterprise compliance; it was about the satisfaction of taking a scrappy project and making it clean, fast, and genuinely well-engineered.
+Instead of treating it like a static homework assignment, I started "min-maxing" it, diving down rabbit holes to figure out how real-time WebSockets actually behave under the hood, how to structure clean Express routing, and how to patch backend gaps, just to see how a robust system should be built. Not because it needed to be enterprise-grade. I just wanted to see how far I could take it.
 
 **Live Demo:** [hotseat.site](https://hotseat.site) / Temporarily off 
 
 ---
+
+## Table of Contents
+
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Architecture](#architecture)
+- [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
+- [Environment Variables](#environment-variables)
+- [API Reference](#api-reference)
+- [WebSocket Events](#websocket-events)
+- [Author](#author)
 
 ## Features
 
@@ -33,14 +45,14 @@ Instead of treating it like a static homework assignment, I started "min-maxing"
 
 ### Canvas Physics & Visual Atmosphere
 - 48‑particle interactive physics engine (`OrbField`) — elastic collisions, wall bounce with energy damping, grab‑and‑fling pointer interaction with momentum trails
-- Sub‑surface glow diffusion via `ctx.shadowBlur` on each orb, casting light through translucent UI panels stacked above the canvas
+- Orbs cast a soft glow through the panels above them via `ctx.shadowBlur`
 - Mouse‑tracked spotlight grid with radial mask and cursor torch, updated via a zero‑React‑rerender `requestAnimationFrame` loop writing CSS custom properties directly to the DOM
 - SVG film grain overlay and static ambient depth orbs for layered atmosphere
 
 ### UI / UX Architecture
 - Strict viewport‑locked layout (`h-screen` root with `overflow: hidden`) — zero global scroll bleed
 - Flex chain (`h‑screen → h‑full → flex‑1 min‑h‑0`) ensures chat containers never overflow the viewport
-- Global `select‑none` on the root wrapper with explicit `select‑text` on all textarea inputs
+- Text selection is disabled everywhere except in text inputs
 - Animated route transitions via Framer Motion `AnimatePresence` with crossfade directionality
 - Zinc monochrome design system with glassmorphic panels (`backdrop‑blur‑2xl`, semi‑transparent dark overlays)
 - Zero‑padded odometer‑style countdown timer using `useMotionValueEvent` for spring‑driven number animation
@@ -55,7 +67,7 @@ Instead of treating it like a static homework assignment, I started "min-maxing"
 
 ### Data & Analytics
 - Answer archive with calendar‑grid date browsing
-- Weekly/monthly recap leaderboards (MVP, Novelist, Speedster, Ghost, Hottest Day)
+- Weekly/monthly recap leaderboards (MVP, Novelist, Speedster, Ghost, Hottest Day) — Ghost is the member with the fewest answers
 - Web push notifications (VAPID) for daily question alerts with stale subscription auto‑cleanup
 
 ## Tech Stack
@@ -80,35 +92,7 @@ Instead of treating it like a static homework assignment, I started "min-maxing"
 
 ## Architecture
 
-### Layout Strategy
-
-The entire viewport is locked at `h-screen overflow-hidden` on the root `<main>` element. Every interior container uses `h-full` to form an unbroken flex chain down to the deepest scrollable region (`flex-1 min-h-0 overflow-y-auto`). This guarantees that chat panels and result cards never push the bottom navigation bar off‑screen, regardless of message count.
-
-### State Flow
-
-```
-Zustand Store (persisted to localStorage)
- ├─ user / group / streak / lang     ← survives page reloads
- ├─ currentQuestion / groupAnswers   ← fetched fresh from API on mount
- └─ UI flags (isLoading, error)      ← ephemeral, never persisted
-
-Socket.IO
- ├─ join_room / leave_room           ← membership validated against DB on every join
- ├─ send_message → receive_message   ← broadcast + PostgreSQL persistence
- └─ answer_submitted                 ← triggers store.fetchGroupAnswers() client‑side
-```
-
-### Background Rendering Stack (z‑index order)
-
-| Layer | z‑index | Role |
-|---|---|---|
-| Static ambient orbs (blurred divs) | `z‑0` | Atmospheric depth |
-| `<OrbField />` canvas | `z‑0` | Interactive physics particles with shadowBlur glow |
-| Spotlight grid + cursor torch | `z‑[5]` | Mouse‑tracked radial mask over 18px dot grid |
-| Film grain SVG | `z‑50` | `mix‑blend‑overlay` at 3% opacity |
-| Foreground UI container | `z‑10` | Routes, panels, bottom nav — all above canvas |
-
-The canvas sits **behind** the UI. Semi‑transparent glassmorphic panels (`bg‑zinc‑900/60 backdrop‑blur‑2xl`) diffuse the orb glow natively via the GPU compositor — no JavaScript DOM tracking needed.
+For layout strategy, state flow, and the canvas rendering stack, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## Project Structure
 
