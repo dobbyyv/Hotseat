@@ -1,9 +1,16 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 const { pool } = require('../config/db');
 const { strictLimiter } = require('../middleware/rateLimiter');
+const { uploadPfp, saveImage } = require('../middleware/upload');
 
 const router = express.Router();
+
+// Cryptographically secure, unguessable group codes.
+function generateGroupCode() {
+  return crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6);
+}
 
 router.post('/join', strictLimiter, async (req, res) => {
   const { name, code } = req.body;
@@ -35,7 +42,7 @@ router.post('/join', strictLimiter, async (req, res) => {
     } else {
       let newCode;
       for (let i = 0; i < 5; i++) {
-        newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+        newCode = generateGroupCode();
         const existing = await client.query("SELECT id FROM groups WHERE code = $1", [newCode]);
         if (existing.rows.length === 0) break;
       }
@@ -155,16 +162,19 @@ router.get('/user-groups/:user_id', async (req, res) => {
 });
 
 router.post('/upload-pfp', strictLimiter, (req, res) => {
-  const { uploadPfp } = require('../middleware/upload');
   uploadPfp.single('avatar')(req, res, async (err) => {
-    if (err) return res.status(400).json({ error: err.message });
+    if (err) return res.status(400).json({ error: 'Invalid image.' });
     if (!req.file) return res.status(400).json({ error: 'No image provided.' });
     try {
-      const fileUrl = `/uploads/${req.file.filename}`;
+      const filename = await saveImage(req.file.buffer, 'pfp', false);
+      const fileUrl = `/uploads/${filename}`;
       await pool.query("UPDATE users SET avatar_url = $1 WHERE id = $2", [fileUrl, req.body.user_id]);
       res.json({ avatar_url: fileUrl });
     } catch (dbErr) {
       console.error(dbErr);
+      if (dbErr && dbErr.message === 'Invalid image content.') {
+        return res.status(400).json({ error: 'Invalid image.' });
+      }
       res.status(500).json({ error: "DB update failed." });
     }
   });

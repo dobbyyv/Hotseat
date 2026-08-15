@@ -1,6 +1,8 @@
 const express = require('express');
 const { pool } = require('../config/db');
 const { strictLimiter, suggestionLimiter } = require('../middleware/rateLimiter');
+const { requireGroupMember } = require('../middleware/requireMember');
+const { isSafeEndpoint } = require('../middleware/ssrfGuard');
 const { broadcastToGroup } = require('../sockets/socketHandler');
 
 const router = express.Router();
@@ -126,23 +128,12 @@ router.post('/answer', strictLimiter, async (req, res) => {
   } catch (err) {
     if (err.code === '23505') return res.status(400).json({ error: "Already answered today." });
     console.error("/api/answer error:", err.message);
-    res.status(500).json({ error: `Database error: ${err.message}` });
+    res.status(500).json({ error: "Server error." });
   }
 });
 
-router.get('/answers/:group_id/:question_id', async (req, res) => {
+router.get('/answers/:group_id/:question_id', requireGroupMember, async (req, res) => {
   const { group_id, question_id } = req.params;
-  const userId = parseInt(req.query.user_id, 10);
-
-  if (userId) {
-    const memberCheck = await pool.query(
-      "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
-      [userId, group_id]
-    );
-    if (memberCheck.rows.length === 0) {
-      return res.status(403).json({ error: "You are not a member of this group." });
-    }
-  }
 
   try {
     const result = await pool.query(`
@@ -183,7 +174,10 @@ router.post('/suggest-question', suggestionLimiter, async (req, res) => {
 
 router.post('/push/subscribe', async (req, res) => {
   const { user_id, subscription } = req.body;
-  if (!user_id || !subscription) return res.status(400).json({ error: 'Missing parameters.' });
+  if (!user_id || !subscription || !subscription.endpoint) return res.status(400).json({ error: 'Missing parameters.' });
+  if (!(await isSafeEndpoint(subscription.endpoint))) {
+    return res.status(400).json({ error: 'Invalid subscription endpoint.' });
+  }
   try {
     await pool.query(
       `INSERT INTO push_subscriptions (user_id, subscription)
@@ -198,7 +192,7 @@ router.post('/push/subscribe', async (req, res) => {
   }
 });
 
-router.get('/calendar/:group_id', async (req, res) => {
+router.get('/calendar/:group_id', requireGroupMember, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT question_date, question_text, question_text_it, COUNT(*) as answer_count
@@ -213,7 +207,7 @@ router.get('/calendar/:group_id', async (req, res) => {
   }
 });
 
-router.get('/calendar/:group_id/:date', async (req, res) => {
+router.get('/calendar/:group_id/:date', requireGroupMember, async (req, res) => {
   const { group_id, date } = req.params;
   if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
     return res.status(400).json({ error: "Invalid date format. Use YYYY-MM-DD." });
@@ -231,7 +225,7 @@ router.get('/calendar/:group_id/:date', async (req, res) => {
   }
 });
 
-router.get('/recap/:group_id/:period', async (req, res) => {
+router.get('/recap/:group_id/:period', requireGroupMember, async (req, res) => {
   const { group_id, period } = req.params;
   if (!['weekly', 'monthly'].includes(period)) {
     return res.status(400).json({ error: "Period must be 'weekly' or 'monthly'." });

@@ -161,7 +161,7 @@ const useStore = create(
         if (!state.currentQuestion || !state.group) return;
         set({ isFetchingAnswers: true });
         try {
-          const response = await fetch(`${SERVER_URL}/api/answers/${state.group.id}/${state.currentQuestion.id}`);
+          const response = await fetch(`${SERVER_URL}/api/answers/${state.group.id}/${state.currentQuestion.id}?user_id=${state.user.id}`);
           if (response.ok) {
             const data = await response.json();
             const didIAnswer = data.some(ans => ans.user_id === state.user.id);
@@ -202,7 +202,7 @@ const useStore = create(
         const state = get();
         if (!state.group || !state.user) return;
         try {
-          const response = await fetch(`${SERVER_URL}/api/group-members/${state.group.id}`);
+          const response = await fetch(`${SERVER_URL}/api/group-members/${state.group.id}?user_id=${state.user.id}`);
           if (response.ok) {
             const members = await response.json();
             const isStillInGroup = members.some(m => m.id === state.user.id);

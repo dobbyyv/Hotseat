@@ -4,7 +4,7 @@ require('dotenv').config();
 const {
   DB_USER, DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT,
   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL,
-  CORS_ORIGIN, SERVER_PORT = '5000'
+  CORS_ORIGIN, SERVER_PORT = '5000', TRUST_PROXY = 'false'
 } = process.env;
 
 // The server will refuse to start if any are missing.
@@ -26,5 +26,6 @@ if (missing.length > 0) {
 module.exports = {
   DB_USER, DB_HOST, DB_NAME, DB_PASSWORD, DB_PORT: parseInt(DB_PORT, 10),
   VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL,
-  CORS_ORIGIN, SERVER_PORT: parseInt(SERVER_PORT, 10)
+  CORS_ORIGIN, SERVER_PORT: parseInt(SERVER_PORT, 10),
+  TRUST_PROXY
 };

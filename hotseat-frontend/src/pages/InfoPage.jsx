@@ -7,7 +7,7 @@ import useSFX from '../useSFX'
 
 const API = import.meta.env.VITE_SERVER_URL ? import.meta.env.VITE_SERVER_URL.replace(/\/+$/, '') : ''
 
-function CalendarTab({ groupId, lang }) {
+function CalendarTab({ groupId, userId, lang }) {
   const [calendarData, setCalendarData] = useState([])
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDay, setSelectedDay] = useState(null)
@@ -15,7 +15,7 @@ function CalendarTab({ groupId, lang }) {
   const [loading, setLoading] = useState(false)
   const playSFX = useSFX()
 
-  useEffect(() => { if (!groupId) return; fetch(`${API}/api/calendar/${groupId}`).then(async (r) => { if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`); const text = await r.text(); try { return JSON.parse(text) } catch (e) { throw new Error("Server did not return valid JSON") } }).then(data => { setCalendarData(Array.isArray(data) ? data : []) }).catch(err => { console.error("Calendar sync failed:", err); setCalendarData([]) }) }, [groupId])
+  useEffect(() => { if (!groupId) return; fetch(`${API}/api/calendar/${groupId}?user_id=${userId}`).then(async (r) => { if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`); const text = await r.text(); try { return JSON.parse(text) } catch (e) { throw new Error("Server did not return valid JSON") } }).then(data => { setCalendarData(Array.isArray(data) ? data : []) }).catch(err => { console.error("Calendar sync failed:", err); setCalendarData([]) }) }, [groupId])
 
   const activeDates = new Set((calendarData || []).map(d => d.question_date?.split('T')[0]))
   const year = currentMonth.getFullYear(); const month = currentMonth.getMonth()
@@ -27,7 +27,7 @@ function CalendarTab({ groupId, lang }) {
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
     if (!activeDates.has(dateStr)) return; playSFX('thock'); if (selectedDay === dateStr) { setSelectedDay(null); return }
     setLoading(true); setSelectedDay(dateStr)
-    try { const res = await fetch(`${API}/api/calendar/${groupId}/${dateStr}`); if (!res.ok) throw new Error("Failed to fetch day"); const data = await res.json(); setDayData(Array.isArray(data) ? data : []) } catch (err) { console.error(err); setDayData([]) }
+    try { const res = await fetch(`${API}/api/calendar/${groupId}/${dateStr}?user_id=${userId}`); if (!res.ok) throw new Error("Failed to fetch day"); const data = await res.json(); setDayData(Array.isArray(data) ? data : []) } catch (err) { console.error(err); setDayData([]) }
     setLoading(false)
   }
 
@@ -85,9 +85,9 @@ const CARDS = [
   { key: 'hottest', label: '🔥 Hottest Day', gradient: 'from-zinc-800/50 to-zinc-900/50 border-white/10', accent: 'text-white', getValue: d => d.hottest_day ? new Date(d.hottest_day.question_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—', getSub: d => d.hottest_day ? `"${d.hottest_day.question_text?.substring(0, 40)}..." · ${d.hottest_day.count} answers` : 'No data yet' },
 ]
 
-function RecapTab({ groupId }) {
+function RecapTab({ groupId, userId }) {
   const [period, setPeriod] = useState('weekly'); const [data, setData] = useState(null); const [loading, setLoading] = useState(false); const playSFX = useSFX()
-  useEffect(() => { if (!groupId) return; setLoading(true); setData(null); fetch(`${API}/api/recap/${groupId}/${period}`).then(async (r) => { if (!r.ok) throw new Error("Recap fetch failed"); const text = await r.text(); return JSON.parse(text) }).then(d => { setData(d); setLoading(false) }).catch(err => { console.error(err); setLoading(false) }) }, [groupId, period])
+  useEffect(() => { if (!groupId) return; setLoading(true); setData(null); fetch(`${API}/api/recap/${groupId}/${period}?user_id=${userId}`).then(async (r) => { if (!r.ok) throw new Error("Recap fetch failed"); const text = await r.text(); return JSON.parse(text) }).then(d => { setData(d); setLoading(false) }).catch(err => { console.error(err); setLoading(false) }) }, [groupId, period])
   const hasData = data && data.stats && parseInt(data.stats.total_answers) > 0
   return (
     <div className="pb-10">
@@ -121,7 +121,7 @@ function RecapTab({ groupId }) {
 }
 
 export default function InfoPage() {
-  const { group, lang } = useStore(); const [tab, setTab] = useState('calendar'); const playSFX = useSFX()
+  const { group, user, lang } = useStore(); const [tab, setTab] = useState('calendar'); const playSFX = useSFX()
   useEffect(() => { playSFX('woosh') }, [playSFX])
   return (
     <div className="h-full flex flex-col">
@@ -144,8 +144,8 @@ export default function InfoPage() {
       {/* Scrollable content — clears the floating nav pill */}
       <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-32">
         <AnimatePresence mode="wait">
-          {tab === 'calendar' && <motion.div key="cal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2, ease: "easeOut" }}><CalendarTab groupId={group?.id} lang={lang || 'en'} /></motion.div>}
-          {tab === 'recap' && <motion.div key="recap" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2, ease: "easeOut" }}><RecapTab groupId={group?.id} /></motion.div>}
+          {tab === 'calendar' && <motion.div key="cal" initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }} transition={{ duration: 0.2, ease: "easeOut" }}><CalendarTab groupId={group?.id} userId={user?.id} lang={lang || 'en'} /></motion.div>}
+          {tab === 'recap' && <motion.div key="recap" initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -10 }} transition={{ duration: 0.2, ease: "easeOut" }}><RecapTab groupId={group?.id} userId={user?.id} /></motion.div>}
         </AnimatePresence>
       </div>
     </div>

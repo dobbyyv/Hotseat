@@ -163,7 +163,7 @@ export default function ResultsPage() {
   useEffect(() => { playSFX('woosh') }, [playSFX])
   useEffect(() => { if (!question) fetchTodayQuestion() }, [question, fetchTodayQuestion])
   useEffect(() => { if (todayAnswered && question) { fetchGroupAnswers(); setTimeout(() => setRevealed(true), 400) } }, [todayAnswered, question, fetchGroupAnswers])
-  useEffect(() => { if (!group?.id) return; fetch(`${SERVER_URL}/api/chat/${group.id}`).then(r => r.json()).then(data => Array.isArray(data) && setMessages(data)).catch(console.error) }, [group?.id])
+  useEffect(() => { if (!group?.id || !user?.id) return; fetch(`${SERVER_URL}/api/chat/${group.id}?user_id=${user.id}`).then(r => r.json()).then(data => Array.isArray(data) && setMessages(data)).catch(console.error) }, [group?.id, user?.id])
 
   useEffect(() => {
     if (!group || !user) return

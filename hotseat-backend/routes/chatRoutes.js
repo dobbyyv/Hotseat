@@ -1,24 +1,13 @@
 const express = require('express');
 const { pool } = require('../config/db');
 const { strictLimiter } = require('../middleware/rateLimiter');
-const { uploadChat } = require('../middleware/upload');
+const { uploadChat, saveImage } = require('../middleware/upload');
+const { requireGroupMember } = require('../middleware/requireMember');
 
 const router = express.Router();
 
-router.get('/chat/:group_id', async (req, res) => {
+router.get('/chat/:group_id', requireGroupMember, async (req, res) => {
   const { group_id } = req.params;
-  const userId = parseInt(req.query.user_id, 10);
-
-  if (userId) {
-    const memberCheck = await pool.query(
-      "SELECT 1 FROM group_members WHERE user_id = $1 AND group_id = $2",
-      [userId, group_id]
-    );
-    if (memberCheck.rows.length === 0) {
-      return res.status(403).json({ error: "You are not a member of this group." });
-    }
-  }
-
   try {
     const result = await pool.query(
       "SELECT * FROM daily_chat WHERE group_id = $1 ORDER BY created_at ASC",
@@ -33,9 +22,15 @@ router.get('/chat/:group_id', async (req, res) => {
 
 router.post('/chat-image', strictLimiter, (req, res) => {
   uploadChat.single('image')(req, res, async (err) => {
-    if (err) return res.status(400).json({ error: err.message });
+    if (err) return res.status(400).json({ error: 'Invalid image.' });
     if (!req.file) return res.status(400).json({ error: 'No image provided.' });
-    res.json({ url: `/uploads/${req.file.filename}` });
+    try {
+      const filename = await saveImage(req.file.buffer, 'chat', true);
+      res.json({ url: `/uploads/${filename}` });
+    } catch (e) {
+      console.error(e);
+      res.status(400).json({ error: 'Invalid image.' });
+    }
   });
 });
 

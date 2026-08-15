@@ -1,8 +1,15 @@
 const express = require('express');
+const crypto = require('crypto');
 const { pool } = require('../config/db');
 const { strictLimiter } = require('../middleware/rateLimiter');
+const { requireGroupMember } = require('../middleware/requireMember');
 
 const router = express.Router();
+
+// Cryptographically secure, unguessable group codes.
+function generateGroupCode() {
+  return crypto.randomBytes(4).toString('hex').toUpperCase().slice(0, 6);
+}
 
 router.post('/join-group', strictLimiter, async (req, res) => {
   const { user_id, code } = req.body;
@@ -65,7 +72,7 @@ router.post('/create-group', strictLimiter, async (req, res) => {
 
     let newCode;
     for (let i = 0; i < 5; i++) {
-      newCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+      newCode = generateGroupCode();
       const existing = await client.query("SELECT id FROM groups WHERE code = $1", [newCode]);
       if (existing.rows.length === 0) break;
     }
@@ -176,7 +183,7 @@ router.post('/admin/kick-member', async (req, res) => {
   }
 });
 
-router.get('/group-members/:group_id', async (req, res) => {
+router.get('/group-members/:group_id', requireGroupMember, async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT users.id, users.name, users.avatar_text, users.avatar_url, group_members.streak_count

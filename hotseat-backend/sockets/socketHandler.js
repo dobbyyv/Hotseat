@@ -1,6 +1,7 @@
 const { pool } = require('../config/db');
 const webpush = require('web-push');
 const { VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL } = require('../config/env');
+const { isSafeEndpoint } = require('../middleware/ssrfGuard');
 
 webpush.setVapidDetails(
   'mailto:' + VAPID_EMAIL.replace(/^mailto:/i, ''),
@@ -20,7 +21,14 @@ async function broadcastToGroup(groupId, senderId, title, body, targetUrl = '/')
     const payload = JSON.stringify({ title, body, url: targetUrl });
 
     for (const row of result.rows) {
-      webpush.sendNotification(row.subscription, payload).catch(err => {
+      const sub = row.subscription;
+      if (!sub || !sub.endpoint) continue;
+      const safe = await isSafeEndpoint(sub.endpoint).catch(() => false);
+      if (!safe) {
+        console.warn(`[Push] blocked unsafe subscription endpoint for user ${row.user_id}`);
+        continue;
+      }
+      webpush.sendNotification(sub, payload).catch(err => {
         if (err.statusCode === 410 || err.statusCode === 404) {
           pool.query("DELETE FROM push_subscriptions WHERE user_id = $1", [row.user_id]);
         }

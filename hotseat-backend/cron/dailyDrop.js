@@ -2,6 +2,7 @@ const cron = require('node-cron');
 const path = require('path');
 const fs = require('fs');
 const { pool } = require('../config/db');
+const { isSafeEndpoint } = require('../middleware/ssrfGuard');
 
 const uploadsDir = path.join(__dirname, '..', 'uploads');
 
@@ -107,7 +108,14 @@ function scheduleDailyDrop() {
       });
 
       for (const row of allSubs.rows) {
-        webpush.sendNotification(row.subscription, payload).catch(err => {
+        const sub = row.subscription;
+        if (!sub || !sub.endpoint) continue;
+        const safe = await isSafeEndpoint(sub.endpoint).catch(() => false);
+        if (!safe) {
+          console.warn(`[Push] blocked unsafe subscription endpoint for user ${row.user_id}`);
+          continue;
+        }
+        webpush.sendNotification(sub, payload).catch(err => {
           if (err.statusCode === 410 || err.statusCode === 404) {
             pool.query("DELETE FROM push_subscriptions WHERE user_id = $1", [row.user_id]);
           }
