@@ -5,11 +5,11 @@
 [![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14%2B-4169E1?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
-A real-time daily question platform for friend groups. One question drops every day at 9:00 AM CET. Everyone submits their answer privately. Once you've answered, the results unlock and you can see what your friends said — alongside a live group chat, GIF search, and push notifications.
+A real-time daily question platform for friend groups. One question drops every day at 9:00 AM CET. Everyone submits their answer privately. Once you've answered, the results unlock and you can see what your friends said alongside a live group chat, GIF search, and push notifications.
 
 Hotseat started as a simple, zero-stress app built just for me and my friends to use daily. But as I kept working on it, it turned into an accidental playground for learning full-stack engineering. 
 
-Instead of treating it like a finished assignment, I kept min-maxing it — figuring out how WebSockets actually behave under load, cleaning up the Express routing as I went. Not because it needed to be enterprise-grade. I wanted to see how far I could take it.
+Instead of treating it like a finished assignment, I kept min-maxing it, figuring out how WebSockets actually behave under load, cleaning up the Express routing as I went. Not because it needed to be enterprise-grade. I wanted to see how far I could take it.
 
 **Live Demo:** [hotseat.site](https://hotseat.site) — self-hosted on my own Linux server.
 
