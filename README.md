@@ -9,7 +9,7 @@ A real-time daily question platform for friend groups. One question drops every 
 
 Hotseat started as a simple, zero-stress app built just for me and my friends to use daily. But as I kept working on it, it turned into an accidental playground for learning full-stack engineering. 
 
-Instead of treating it like a static homework assignment, I started "min-maxing" it, diving down rabbit holes to figure out how real-time WebSockets actually behave under the hood, how to structure clean Express routing, and how to patch backend gaps, just to see how a robust system should be built. Not because it needed to be enterprise-grade. I just wanted to see how far I could take it.
+Instead of treating it like a finished assignment, I kept min-maxing it — figuring out how WebSockets actually behave under load, cleaning up the Express routing as I went. Not because it needed to be enterprise-grade. I wanted to see how far I could take it.
 
 **Live Demo:** [hotseat.site](https://hotseat.site) — self-hosted on my own Linux server.
 
