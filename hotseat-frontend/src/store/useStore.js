@@ -11,6 +11,7 @@ const useStore = create(
       group: null,
       streak: 0,
       lang: 'en',
+      consentedAt: null,
       
       // Ephemeral server data (fetched fresh each session)
       userGroups: [],
@@ -26,6 +27,9 @@ const useStore = create(
       // Actions
       
       setLang: (language) => set({ lang: language }),
+
+      // GDPR clickwrap consent — records when the user accepted ToS + Privacy Policy.
+      setConsent: () => set({ consentedAt: new Date().toISOString() }),
 
       // Direct state setters for socket-driven updates
       setGroup: (groupObj) => set({ group: groupObj }),
@@ -295,6 +299,7 @@ const useStore = create(
           group: state.group,
           streak: state.streak,
           lang: state.lang,
+          consentedAt: state.consentedAt,
         })
     }
   )

@@ -6,6 +6,31 @@ import useStore from '../store/useStore'
 import { t } from '../translations'
 import useSFX from '../useSFX'
 import useTypingEffect from '../hooks/useTypingEffect'
+import LegalModal from '../components/LegalModal'
+
+function ConsentText({ onOpenDoc }) {
+  return (
+    <p className="text-xs text-gray-400 text-center mt-2 mb-3 leading-relaxed">
+      By continuing, you agree to Hotseat&apos;s{' '}
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onOpenDoc('terms') }}
+        className="underline underline-offset-2 hover:text-gray-300"
+      >
+        Terms of Service
+      </button>{' '}
+      and{' '}
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); onOpenDoc('privacy') }}
+        className="underline underline-offset-2 hover:text-gray-300"
+      >
+        Privacy Policy
+      </button>
+      .
+    </p>
+  )
+}
 
 export default function JoinPage() {
   const [step, setStep] = useState(0)
@@ -23,9 +48,12 @@ export default function JoinPage() {
   const [loginPassword, setLoginPassword] = useState('')
   const [loginError, setLoginError] = useState('')
 
-  const { joinGroup, recoverAccount, isLoading, error, lang } = useStore()
+  const { joinGroup, recoverAccount, isLoading, error, lang, setConsent } = useStore()
   const navigate = useNavigate()
   const playSFX = useSFX()
+
+  const [legalDoc, setLegalDoc] = useState(null)
+  const openLegal = (doc) => { playSFX('click'); setLegalDoc(doc) }
 
   useEffect(() => {
     playSFX('woosh')
@@ -57,6 +85,7 @@ export default function JoinPage() {
   const handleName = async (e) => {
     e?.preventDefault()
     if (name.trim().length < 2) return
+    setConsent()
     playSFX('click')
     if (isDeepLink) {
       // Frictionless: skip code entry, join directly with pre-filled code
@@ -74,6 +103,7 @@ export default function JoinPage() {
   const handleLogin = async (e) => {
     e.preventDefault()
     setLoginError('')
+    setConsent()
     if (!loginName || !loginPassword) {
       playSFX('error')
       setLoginError("Please enter your exact name and password.")
@@ -95,6 +125,7 @@ export default function JoinPage() {
   const handleJoin = async (e) => {
     e?.preventDefault()
     if (code.trim().length < 4) return
+    setConsent()
     playSFX('thock')
     const success = await joinGroup(name.trim(), code.trim())
     if (success) {
@@ -104,6 +135,7 @@ export default function JoinPage() {
   }
 
   const handleCreate = async () => {
+    setConsent()
     playSFX('thock')
     const success = await joinGroup(name.trim())
     if (success) {
@@ -173,6 +205,8 @@ export default function JoinPage() {
                 </div>
               )}
               
+              <ConsentText onOpenDoc={openLegal} />
+
               <button 
                 type="submit"
                 disabled={isLoading}
@@ -217,9 +251,11 @@ export default function JoinPage() {
                 autoFocus
                 autoComplete="off"
                 inputMode="text"
-                className="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-3.5 text-white font-medium text-sm placeholder:text-zinc-600 outline-none focus:border-white/30 transition-colors mb-6"
+                className="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-4 py-3.5 text-white font-medium text-sm placeholder:text-zinc-600 outline-none focus:border-white/30 transition-colors mb-2"
               />
               
+              <ConsentText onOpenDoc={openLegal} />
+
               <motion.button 
                 type="submit"
                 whileTap={{ scale: 0.98 }} 
@@ -281,6 +317,8 @@ export default function JoinPage() {
                   className="w-full bg-zinc-800/80 border border-white/10 rounded-xl px-5 py-4 text-white text-lg placeholder:text-zinc-600 outline-none focus:border-white/30 transition-colors tracking-widest font-mono text-center uppercase"
                 />
                 
+                <ConsentText onOpenDoc={openLegal} />
+
                 <motion.button 
                   type="submit"
                   whileTap={{ scale: 0.98 }} 
@@ -310,6 +348,8 @@ export default function JoinPage() {
           )}
         </AnimatePresence>
       </motion.div>
+
+      <LegalModal open={!!legalDoc} initialDoc={legalDoc || 'terms'} onClose={() => setLegalDoc(null)} />
     </div>
   )
 }

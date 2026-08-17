@@ -1,10 +1,11 @@
 import { useRef, useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { LogOut, Camera, Loader2, Key, Edit2, Check, X, Settings, CheckCircle, ShieldAlert, ShieldCheck } from 'lucide-react'
+import { LogOut, Camera, Loader2, Key, Edit2, Check, X, Settings, CheckCircle, ShieldAlert, ShieldCheck, ScrollText } from 'lucide-react'
 import useStore from '../store/useStore'
 import useSFX from '../useSFX'
 import useTypingEffect from '../hooks/useTypingEffect'
+import LegalModal from '../components/LegalModal'
 
 const SERVER_URL = import.meta.env.VITE_SERVER_URL
 
@@ -30,6 +31,9 @@ export default function ProfilePage() {
     leaveGroup: lang === 'it' ? 'Abbandona Gruppo' : 'Leave Group',
     logOut: lang === 'it' ? 'Esci dall\'App' : 'Log Out of App',
     networkError: lang === 'it' ? 'Errore di rete.' : 'Network error.',
+    legal: lang === 'it' ? 'Documenti Legali' : 'Legal',
+    privacyPolicy: lang === 'it' ? 'Informativa Privacy' : 'Privacy Policy',
+    termsOfService: lang === 'it' ? 'Termini di Servizio' : 'Terms of Service',
   }
 
   const [passwordInput, setPasswordInput] = useState('')
@@ -42,6 +46,7 @@ export default function ProfilePage() {
   const [isSavingName, setIsSavingName] = useState(false)
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false)
+  const [legalDoc, setLegalDoc] = useState(null)
 
   useEffect(() => { playSFX('woosh') }, [playSFX])
   useEffect(() => { if (!user) navigate('/') }, [user, navigate])
@@ -167,6 +172,19 @@ export default function ProfilePage() {
           )}
         </AnimatePresence>
 
+        {/* Legal */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.25 }} className="w-full">
+          <p className="text-zinc-500 text-[10px] uppercase tracking-widest mb-3 font-bold">{dict.legal}</p>
+          <div className="flex gap-3">
+            <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }} onClick={() => { playSFX('thock'); setLegalDoc('privacy') }} className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm">
+              <ShieldCheck size={16} /> {dict.privacyPolicy}
+            </motion.button>
+            <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }} onClick={() => { playSFX('thock'); setLegalDoc('terms') }} className="flex-1 bg-white/5 border border-white/10 hover:bg-white/10 text-white font-semibold py-3.5 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm">
+              <ScrollText size={16} /> {dict.termsOfService}
+            </motion.button>
+          </div>
+        </motion.div>
+
         {/* Logout Button */}
         <motion.button initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.3 }} whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }} onClick={() => { playSFX('click'); setShowLogoutConfirm(true) }} className="w-full bg-transparent border-2 border-dashed border-zinc-800 hover:border-red-500/30 text-zinc-500 hover:text-red-400 hover:bg-red-500/5 font-semibold py-4 rounded-2xl flex items-center justify-center gap-2 transition-all">
           <LogOut size={18} /> {dict.logOut}
@@ -191,6 +209,8 @@ export default function ProfilePage() {
           </div>
         )}
       </AnimatePresence>
+
+      <LegalModal open={!!legalDoc} initialDoc={legalDoc || 'terms'} onClose={() => setLegalDoc(null)} />
     </div>
   )
 }
