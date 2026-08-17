@@ -145,17 +145,17 @@ export default function JoinPage() {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col items-center justify-center">
+    <div className="min-h-full w-full flex items-center justify-center p-4">
       {/* Kinetic Glass Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ type: "spring", bounce: 0.4, duration: 0.8 }}
-        className="w-full rounded-2xl border border-white/10 bg-zinc-900/50 backdrop-blur-md p-8 shadow-2xl hover:border-white/20 transition-colors max-w-sm"
+        className="w-full rounded-2xl border border-white/10 bg-zinc-900/50 backdrop-blur-md py-7 px-8 shadow-2xl hover:border-white/20 transition-colors max-w-sm"
       >
         {/* Logo + tagline */}
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-zinc-800 border border-white/10 flex items-center justify-center mb-4 shadow-lg overflow-hidden">
+        <div className="flex flex-col items-center mb-6">
+          <div className="w-14 h-14 rounded-2xl bg-zinc-800 border border-white/10 flex items-center justify-center mb-3 shadow-lg overflow-hidden">
             <img src="/logo.png?v=2" alt="Hotseat Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-white text-2xl font-bold font-display tracking-tight">Hotseat</h1>
@@ -174,7 +174,7 @@ export default function JoinPage() {
               onSubmit={handleLogin} 
             >
               <h3 className="text-lg font-display font-bold text-white tracking-tight mb-1">Welcome Back</h3>
-              <p className="text-zinc-500 text-xs mb-6 font-medium">Enter your credentials to restore your account.</p>
+              <p className="text-zinc-500 text-xs mb-4 font-medium">Enter your credentials to restore your account.</p>
               
               <div className="space-y-4">
                 <input 
@@ -210,7 +210,7 @@ export default function JoinPage() {
               <button 
                 type="submit"
                 disabled={isLoading}
-                className="w-full bg-white text-black font-semibold py-3.5 rounded-xl hover:bg-zinc-200 active:scale-[0.98] transition-all mt-6 flex justify-center items-center gap-2 disabled:opacity-50"
+                className="w-full bg-white text-black font-semibold py-3.5 rounded-xl hover:bg-zinc-200 active:scale-[0.98] transition-all mt-4 flex justify-center items-center gap-2 disabled:opacity-50"
               >
                 {isLoading ? <Loader2 size={18} className="animate-spin" /> : <><LogIn size={18} /> Log In</>}
               </button>
@@ -218,7 +218,7 @@ export default function JoinPage() {
               <button 
                 type="button"
                 onClick={() => { playSFX('woosh'); setIsLoggingIn(false); setLoginError('') }}
-                className="w-full mt-4 text-center text-zinc-500 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors py-2"
+                className="w-full mt-2 text-center text-zinc-500 text-xs font-semibold uppercase tracking-widest hover:text-white transition-colors py-2"
               >
                 Cancel
               </button>
@@ -236,7 +236,7 @@ export default function JoinPage() {
               <h1 className="text-white text-xl font-bold font-display mb-1 tracking-tight">
                 {typedStep0Title}{step0TitleTyping && <span className="animate-pulse text-white">|</span>}
               </h1>
-              <p className="text-zinc-500 text-xs mb-6 font-medium">
+              <p className="text-zinc-500 text-xs mb-4 font-medium">
                 {typedStep0Desc}{step0DescTyping && <span className="animate-pulse text-white">|</span>}
               </p>
               
@@ -265,8 +265,8 @@ export default function JoinPage() {
                 Continue <ArrowRight size={18} />
               </motion.button>
 
-              <div className="mt-6 pt-5 border-t border-white/10 text-center">
-                <p className="text-zinc-500 text-xs font-medium mb-3">Already have an account?</p>
+              <div className="mt-4 pt-4 border-t border-white/10 text-center">
+                <p className="text-zinc-500 text-xs font-medium mb-2">Already have an account?</p>
                 <button 
                   type="button"
                   onClick={() => { playSFX('click'); setIsLoggingIn(true) }}
@@ -285,14 +285,14 @@ export default function JoinPage() {
               initial={{ opacity: 0, x: 40 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -40 }} transition={{ duration: 0.2 }}
               onSubmit={handleJoin}
             >
-              <button type="button" onClick={() => { playSFX('woosh'); setStep(0) }} className="mb-5 text-zinc-500 hover:text-white transition-colors">
+              <button type="button" onClick={() => { playSFX('woosh'); setStep(0) }} className="mb-4 text-zinc-500 hover:text-white transition-colors">
                 <ArrowRight className="rotate-180" size={20} />
               </button>
 
               <h1 className="text-white text-xl font-bold font-display mb-1 tracking-tight">
                 {typedStep1Title}{step1TitleTyping && <span className="animate-pulse text-white">|</span>}
               </h1>
-              <p className="text-zinc-500 text-xs mb-6 font-medium">
+              <p className="text-zinc-500 text-xs mb-4 font-medium">
                 {typedStep1Desc}{step1DescTyping && <span className="animate-pulse text-white">|</span>}
               </p>
       

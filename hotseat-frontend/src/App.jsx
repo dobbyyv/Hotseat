@@ -147,7 +147,7 @@ function App() {
         </svg>
 
         {/* Foreground container — fills the entire 100dvh, BottomNav floats on top */}
-        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 pt-6 pb-2 md:px-12 md:pt-12 md:pb-3 flex-1 min-h-0 overflow-hidden">
+        <div className="relative z-10 w-full max-w-4xl mx-auto px-6 pt-4 pb-4 md:px-12 md:pt-8 md:pb-4 flex-1 min-h-0 overflow-hidden">
           <AnimatedRoutes />
         </div>
       </main>
