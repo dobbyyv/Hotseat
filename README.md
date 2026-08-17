@@ -11,7 +11,7 @@ Hotseat started as a simple, zero-stress app built just for me and my friends to
 
 Instead of treating it like a static homework assignment, I started "min-maxing" it, diving down rabbit holes to figure out how real-time WebSockets actually behave under the hood, how to structure clean Express routing, and how to patch backend gaps, just to see how a robust system should be built. Not because it needed to be enterprise-grade. I just wanted to see how far I could take it.
 
-**Live Demo:** [hotseat.site](https://hotseat.site) 
+**Live Demo:** [hotseat.site](https://hotseat.site) — self-hosted on my own Linux server.
 
 ---
 
@@ -50,8 +50,7 @@ Instead of treating it like a static homework assignment, I started "min-maxing"
 - SVG film grain overlay and static ambient depth orbs for layered atmosphere
 
 ### UI / UX Architecture
-- Strict viewport‑locked layout (`h-screen` root with `overflow: hidden`) — zero global scroll bleed
-- Flex chain (`h‑screen → h‑full → flex‑1 min‑h‑0`) ensures chat containers never overflow the viewport
+- Viewport-locked layout (`h-screen` root, `overflow: hidden`) with a flex chain down to each scrollable region, chat and results panels can grow without ever pushing the bottom nav off-screen
 - Text selection is disabled everywhere except in text inputs
 - Animated route transitions via Framer Motion `AnimatePresence` with crossfade directionality
 - Zinc monochrome design system with glassmorphic panels (`backdrop‑blur‑2xl`, semi‑transparent dark overlays)
@@ -305,4 +304,4 @@ All routes are prefixed with `/api/`. Rate‑limited endpoints use stricter limi
 
 Built by **Karam** — Computer Engineering student.
 
-[GitHub](https://github.com/dobbyyv)
+[GitHub](https://github.com/dobbyyv) · [LinkedIn](www.linkedin.com/in/karam-dobosh)
