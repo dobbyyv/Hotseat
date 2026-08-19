@@ -14,14 +14,6 @@ const SERVER_URL = import.meta.env.VITE_SERVER_URL
 const GIPHY_KEY = import.meta.env.VITE_GIPHY_KEY || ''
 const MAX_CHAT_FILE_SIZE = 5 * 1024 * 1024 // 5 MB
 
-const REACTIONS = [
-  { emoji: '🔥', label: 'fire' },
-  { emoji: '💀', label: 'skull' },
-  { emoji: '👑', label: 'crown' },
-  { emoji: '🎯', label: 'bullseye' },
-  { emoji: '💜', label: 'heart' },
-]
-
 const VoteBreakdown = ({ answers, groupMembers, serverUrl, revealed }) => {
   const total = answers.length
   const ranked = useMemo(() => {
@@ -190,8 +182,6 @@ export default function ResultsPage() {
   }
 
   const handleSendText = () => { if (!messageInput.trim()) return; playSFX('thock'); emitMessage('text', messageInput.trim()); setMessageInput(''); socketRef.current?.emit('typing_end', { group_id: group.id, user_id: user.id }) }
-  const handleSendReaction = (emoji) => { playSFX('thock'); emitMessage('text', emoji) }
-
   const handleImageUpload = async e => {
     const file = e.target.files?.[0]; if (!file) return
     if (file.size > MAX_CHAT_FILE_SIZE) {
@@ -324,21 +314,6 @@ export default function ResultsPage() {
             )}
           </AnimatePresence>
           <div ref={chatEndRef} />
-        </div>
-
-        {/* Emoji reactions — docked at bottom */}
-        <div className="flex items-center justify-center gap-2 flex-wrap pb-2 flex-shrink-0">
-          {REACTIONS.map(r => (
-            <motion.button
-              key={r.label}
-              whileHover={{ y: -3, scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => handleSendReaction(r.emoji)}
-              className="bg-zinc-900/80 border border-white/10 hover:border-white/30 text-xs px-3 py-1.5 rounded-full backdrop-blur-md cursor-pointer transition-all"
-            >
-              {r.emoji}
-            </motion.button>
-          ))}
         </div>
 
         {/* GIF picker */}
