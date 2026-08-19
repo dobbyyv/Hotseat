@@ -34,20 +34,20 @@ function CalendarTab({ groupId, userId, lang }) {
   const calEntry = (calendarData || []).find(d => d.question_date?.split('T')[0] === selectedDay)
 
   return (
-    <div className="pb-10">
+    <div className="pb-6">
       <div className="bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-5 mb-6">
         <div className="flex items-center justify-between mb-6">
           <motion.button whileTap={{ scale: 0.9 }} onClick={() => { playSFX('click'); setCurrentMonth(new Date(year, month - 1)) }} className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-800/80 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"><ChevronLeft size={20} /></motion.button>
           <span className="text-white font-bold font-display text-lg tracking-wide uppercase">{monthName}</span>
           <motion.button whileTap={{ scale: 0.9 }} onClick={() => { playSFX('click'); setCurrentMonth(new Date(year, month + 1)) }} className="w-10 h-10 flex items-center justify-center rounded-xl bg-zinc-800/80 border border-white/10 text-zinc-400 hover:text-white hover:bg-white/10 transition-all"><ChevronRight size={20} /></motion.button>
         </div>
-        <div className="grid grid-cols-7 mb-3">{['S','M','T','W','T','F','S'].map((d, i) => <div key={i} className="text-center text-zinc-500 text-xs py-1 font-bold uppercase tracking-wider">{d}</div>)}</div>
+        <div className="grid grid-cols-7 mb-2">{['S','M','T','W','T','F','S'].map((d, i) => <div key={i} className="text-center text-zinc-500 text-xs py-2 font-bold uppercase tracking-wider">{d}</div>)}</div>
         <div className="grid grid-cols-7 gap-1.5">
           {Array(firstDay).fill(null).map((_, i) => <div key={`e${i}`} />)}
           {Array(daysInMonth).fill(null).map((_, i) => { const day = i + 1; const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`; const isActive = activeDates.has(dateStr); const isToday = dateStr === todayStr; const isSelected = dateStr === selectedDay
             return (
               <motion.button key={day} whileTap={isActive ? { scale: 0.85 } : {}} onClick={() => selectDay(day)}
-                className={`aspect-square rounded-xl flex items-center justify-center text-sm font-bold transition-all relative border ${isSelected ? 'bg-white text-black border-white z-10' : isActive ? 'bg-white/10 text-white border-white/20 cursor-pointer hover:bg-white/20' : isToday ? 'border-white/10 text-zinc-400 bg-zinc-800/50 cursor-default' : 'border-transparent text-zinc-600 cursor-default'}`}>
+                className={`h-10 rounded-xl flex items-center justify-center text-sm font-bold transition-all relative border ${isSelected ? 'bg-white text-black border-white z-10' : isActive ? 'bg-white/10 text-white border-white/20 cursor-pointer hover:bg-white/20' : isToday ? 'border-white/10 text-zinc-400 bg-zinc-800/50 cursor-default' : 'border-transparent text-zinc-600 cursor-default'}`}>
                 {day}{isActive && !isSelected && <span className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-white" />}
               </motion.button>
             )

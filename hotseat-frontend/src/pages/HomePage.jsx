@@ -45,8 +45,9 @@ function CountdownTimer({ lang }) {
   }, [])
 
   const timerDisplay = useMemo(() => (
-    <span className="text-xs font-mono font-bold tracking-widest uppercase text-zinc-500">
-      {lang === 'en' ? 'New question in' : 'Nuova domanda tra'}{' '}
+    <span className="text-xs font-mono tracking-tight text-zinc-400">
+      <Clock size={12} className="inline-block mr-1 align-[-1px] text-zinc-500" />
+      <span className="text-zinc-500">{lang === 'en' ? 'Next in' : 'Prossima tra'}</span>{' '}
       <AnimatedNumber value={time.hours} padTo={2} className="text-zinc-200" />
       <span className="text-zinc-500 mx-0.5">:</span>
       <AnimatedNumber value={time.minutes} padTo={2} className="text-zinc-200" />
@@ -123,11 +124,13 @@ export default function HomePage() {
 
   return (
     <div className="h-full flex flex-col">
-      {/* Header — flex-shrink-0 */}
-      <div className="flex items-center justify-between mb-6 flex-shrink-0">
+
+      {/* Header — compact top bar with inline countdown timer */}
+      <div className="flex items-start justify-between mb-4 flex-shrink-0">
         <div>
           <p className="text-zinc-500 text-[10px] uppercase tracking-widest font-bold mb-1">{text.todaysDrop}</p>
-          <h2 className="text-zinc-200 font-bold text-lg">{group?.name}</h2>
+          <h2 className="text-zinc-200 font-bold text-lg leading-tight mb-1.5">{group?.name}</h2>
+          <CountdownTimer lang={lang} />
         </div>
         <div className="flex items-center gap-3">
           <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.92 }} onClick={toggleLanguage} className="flex items-center gap-1.5 bg-zinc-800/80 border border-white/10 rounded-full px-3 py-1.5 hover:bg-zinc-700/80 transition-colors text-zinc-400">
@@ -140,87 +143,80 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Scrollable content — clears the floating nav pill */}
-      <div className="flex-1 min-h-0 overflow-y-auto no-scrollbar pb-32">
+      {/* Main content — distributed to fit a single viewport */}
+      <div className="flex-1 min-h-0 flex flex-col justify-between pb-24">
 
-      {/* Question Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_-12px_rgba(255,255,255,0.12)] hover:border-white/30 transition-all duration-300 relative overflow-hidden mb-6"
-      >
-        <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-        <div className="flex items-center justify-between mb-6 relative z-10">
-          <span className="text-[10px] tracking-widest uppercase font-mono font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-400">
-            {currentQuestion.category || 'Scenario'}
-          </span>
-          {answeredCount > 0 && (
-            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium animate-breath">
-                <AnimatedNumber value={answeredCount} /> IN
+        {/* Upper group: question card + primary CTA */}
+        <div className="flex flex-col gap-4">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 25 }}
+            className="bg-zinc-900/60 border border-white/10 backdrop-blur-2xl rounded-3xl p-6 sm:p-8 shadow-[0_0_50px_-12px_rgba(255,255,255,0.12)] hover:border-white/30 transition-all duration-300 relative overflow-hidden"
+          >
+            <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+            <div className="flex items-center justify-between mb-6 relative z-10">
+              <span className="text-[10px] tracking-widest uppercase font-mono font-bold px-3 py-1 rounded-full bg-white/5 border border-white/10 text-zinc-400">
+                {currentQuestion.category || 'Scenario'}
               </span>
-            </motion.div>
+              {answeredCount > 0 && (
+                <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-mono font-medium animate-breath">
+                    <AnimatedNumber value={answeredCount} /> IN
+                  </span>
+                </motion.div>
+              )}
+            </div>
+            <p className="text-2xl md:text-3xl font-semibold tracking-tight text-zinc-100 leading-snug mb-6 relative z-10">
+              {activeQuestionText}
+            </p>
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex -space-x-2">
+                {visibleMembers.map((m) => {
+                  const isMe = m.id === user.id
+                  const hasAnswered = todayAnswered && answeredUserIds.has(m.id)
+                  return (
+                    <div key={m.id} className={`w-10 h-10 rounded-full overflow-hidden transition-all duration-300 relative ${isMe ? 'p-[1px] bg-gradient-to-b from-white/30 to-white/5 z-10' : hasAnswered ? 'bg-emerald-600 text-white' : 'bg-zinc-800 border-2 border-white/20 text-zinc-400'}`} title={m.name}>
+                      <div className={`w-full h-full rounded-full flex items-center justify-center text-sm font-mono font-medium ${isMe ? 'bg-zinc-900' : ''}`}>
+                      {m.avatar_url ? <img src={`${SERVER_URL}${m.avatar_url}`} alt="pfp" className="w-full h-full object-cover rounded-full" /> : m.avatar_text}
+                      </div>
+                      {todayAnswered && hasAnswered && !isMe && <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full flex items-center justify-center"><Check size={8} className="text-black" strokeWidth={4} /></span>}
+                    </div>
+                  )
+                })}
+                {extraMembersCount > 0 && <div className="w-10 h-10 rounded-full border-2 border-zinc-800 bg-zinc-800/50 text-zinc-500 flex items-center justify-center text-xs font-mono font-bold">+{extraMembersCount}</div>}
+              </div>
+              <motion.span key={answeredCount} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className={`text-sm font-bold ${allAnswered ? 'text-emerald-400' : 'text-zinc-600'}`}>
+                {answeredCount}/{totalCount} {text.answered}{allAnswered && ' 🎉'}
+              </motion.span>
+            </div>
+          </motion.div>
+
+          {/* Primary CTA */}
+          {!todayAnswered ? (
+            <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/answer') }} className="w-full py-4 rounded-2xl bg-white/90 text-zinc-950 font-semibold text-base shadow-[0_0_20px_rgba(255,255,255,0.12)] hover:bg-white hover:shadow-[0_0_30px_rgba(255,255,255,0.18)] transition-all duration-200 flex items-center justify-center gap-2">
+              {text.dropAnswer} <ChevronRight size={22} />
+            </motion.button>
+          ) : (
+            <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/results') }} className="w-full py-4 rounded-2xl bg-zinc-800/80 border border-white/10 text-zinc-200 font-semibold text-base hover:bg-zinc-700/80 hover:border-white/20 transition-all duration-200 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2">
+              {text.seeOthers} <ChevronRight size={22} className="text-zinc-400" />
+            </motion.button>
           )}
         </div>
-        <p className="text-2xl md:text-3xl font-semibold tracking-tight text-zinc-100 leading-snug mb-8 relative z-10">
-          {activeQuestionText}
-        </p>
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex -space-x-2">
-            {visibleMembers.map((m) => {
-              const isMe = m.id === user.id
-              const hasAnswered = todayAnswered && answeredUserIds.has(m.id)
-              return (
-                <div key={m.id} className={`w-10 h-10 rounded-full overflow-hidden transition-all duration-300 relative ${isMe ? 'p-[1px] bg-gradient-to-b from-white/30 to-white/5 z-10' : hasAnswered ? 'bg-emerald-600 text-white' : 'bg-zinc-800 border-2 border-white/20 text-zinc-400'}`} title={m.name}>
-                  <div className={`w-full h-full rounded-full flex items-center justify-center text-sm font-mono font-medium ${isMe ? 'bg-zinc-900' : ''}`}>
-                  {m.avatar_url ? <img src={`${SERVER_URL}${m.avatar_url}`} alt="pfp" className="w-full h-full object-cover rounded-full" /> : m.avatar_text}
-                  </div>
-                  {todayAnswered && hasAnswered && !isMe && <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 rounded-full flex items-center justify-center"><Check size={8} className="text-black" strokeWidth={4} /></span>}
-                </div>
-              )
-            })}
-            {extraMembersCount > 0 && <div className="w-10 h-10 rounded-full border-2 border-zinc-800 bg-zinc-800/50 text-zinc-500 flex items-center justify-center text-xs font-mono font-bold">+{extraMembersCount}</div>}
-          </div>
-          <motion.span key={answeredCount} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className={`text-sm font-bold ${allAnswered ? 'text-emerald-400' : 'text-zinc-600'}`}>
-            {answeredCount}/{totalCount} {text.answered}{allAnswered && ' 🎉'}
-          </motion.span>
+
+        {/* Lower group: invite code + suggest question */}
+        <div className="flex flex-col items-center gap-3">
+          <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }} onClick={handleShare} className="flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors py-1">
+            {copied ? <Check size={13} className="text-emerald-500" /> : <Share size={13} />}
+            <span className="text-xs font-mono tracking-widest">{copied ? (text.inviteCopied || 'Invite link copied!') : `${text.inviteCode}: ${group?.code}`}</span>
+          </motion.button>
+
+          <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} onClick={() => { playSFX('click'); setIsSuggesting(true) }} className="flex items-center gap-2 bg-zinc-900/40 border border-white/10 hover:border-white/20 hover:bg-zinc-800/50 text-zinc-300 text-sm py-2.5 px-5 rounded-xl font-medium transition-all">
+            <Lightbulb size={15} /> {suggestText.suggestBtn}
+          </motion.button>
         </div>
-      </motion.div>
-
-      {/* Primary CTA */}
-      {!todayAnswered ? (
-        <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/answer') }} className="w-full py-4 rounded-2xl bg-white/90 text-zinc-950 font-semibold text-base shadow-[0_0_20px_rgba(255,255,255,0.12)] hover:bg-white hover:shadow-[0_0_30px_rgba(255,255,255,0.18)] transition-all duration-200 flex items-center justify-center gap-2">
-          {text.dropAnswer} <ChevronRight size={22} />
-        </motion.button>
-      ) : (
-        <motion.button whileHover={{ scale: 1.015 }} whileTap={{ scale: 0.985 }} onClick={() => { playSFX('woosh'); navigate('/results') }} className="w-full py-4 rounded-2xl bg-zinc-800/80 border border-white/10 text-zinc-200 font-semibold text-base hover:bg-zinc-700/80 hover:border-white/20 transition-all duration-200 shadow-[0_0_30px_rgba(0,0,0,0.5)] flex items-center justify-center gap-2">
-          {text.seeOthers} <ChevronRight size={22} className="text-zinc-400" />
-        </motion.button>
-      )}
-
-      {/* Share */}
-      <motion.button whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.97 }} onClick={handleShare} className="w-full mt-4 flex items-center justify-center gap-2 text-zinc-500 hover:text-zinc-300 transition-colors py-3">
-        {copied ? <Check size={13} className="text-emerald-500" /> : <Share size={13} />}
-        <span className="text-xs font-mono tracking-widest">{copied ? (text.inviteCopied || 'Invite link copied!') : `${text.inviteCode}: ${group?.code}`}</span>
-      </motion.button>
-
-      {/* Timer */}
-      <div className="mt-6 flex items-center justify-center gap-2 text-zinc-500 font-mono text-xs bg-zinc-900/80 border border-white/10 px-4 py-2 rounded-full w-max mx-auto">
-        <Clock size={12} className="text-zinc-400" />
-        <CountdownTimer lang={lang} />
       </div>
-
-      {/* Suggest */}
-      <div className="mt-8 flex justify-center">
-        <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.95 }} onClick={() => { playSFX('click'); setIsSuggesting(true) }} className="flex items-center gap-2 bg-zinc-900/40 border border-white/10 hover:border-white/20 hover:bg-zinc-800/50 text-zinc-300 text-sm py-2.5 px-5 rounded-xl font-medium transition-all">
-          <Lightbulb size={15} /> {suggestText.suggestBtn}
-        </motion.button>
-      </div>
-
-      </div>
-      {/* end scrollable content */}
 
       {/* Suggest Modal */}
       <AnimatePresence>
