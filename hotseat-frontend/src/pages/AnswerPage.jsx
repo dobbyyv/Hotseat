@@ -150,7 +150,6 @@ export default function AnswerPage() {
           </motion.div>
         ) : (
           <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="mt-8 text-center bg-zinc-900/60 border border-white/10 rounded-[2rem] py-12 backdrop-blur-2xl">
-            <div className="text-6xl mb-4">🔒</div>
             <p className="text-white font-bold font-display text-2xl tracking-tight">Answer Locked.</p>
             <p className="text-zinc-400 text-sm font-bold mt-2">Generating results...</p>
           </motion.div>

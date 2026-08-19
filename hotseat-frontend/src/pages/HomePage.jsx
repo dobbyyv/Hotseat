@@ -188,7 +188,7 @@ export default function HomePage() {
                 {extraMembersCount > 0 && <div className="w-10 h-10 rounded-full border-2 border-zinc-800 bg-zinc-800/50 text-zinc-500 flex items-center justify-center text-xs font-mono font-bold">+{extraMembersCount}</div>}
               </div>
               <motion.span key={answeredCount} initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} className={`text-sm font-bold ${allAnswered ? 'text-emerald-400' : 'text-zinc-600'}`}>
-                {answeredCount}/{totalCount} {text.answered}{allAnswered && ' 🎉'}
+                {answeredCount}/{totalCount} {text.answered}
               </motion.span>
             </div>
           </motion.div>
